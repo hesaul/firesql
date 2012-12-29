@@ -1,0 +1,78 @@
+/*
+ * FireSql a detection and protection sql injection engine.
+ *
+ * Copyright (C) 2012  Luis Campo Giralte
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA  02110-1301, USA.
+ *
+ * Written by Luis Campo Giralte <luis.camp0.2009@gmail.com> 2012
+ *
+ */
+
+#ifndef FIRESQL_PROXY_H
+#define FIRESQL_PROXY_H
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <cstddef>
+#include <boost/asio.hpp>
+#include "connection.h"
+
+class Proxy
+{
+public:
+	explicit Proxy(boost::asio::io_service& io_service,
+        	const std::string& local_host, unsigned short local_port,
+                const std::string& server_host, unsigned short server_port)
+        	: io_service_(io_service),
+//		signals_(io_service),
+           	localhost_address(boost::asio::ip::address_v4::from_string(local_host)),
+           	acceptor_(io_service_,boost::asio::ip::tcp::endpoint(localhost_address,local_port)),
+           	server_port_(server_port),
+           	server_host_(server_host),
+		total_connections(0)
+	{
+/* 
+      		signals_.add(SIGINT);
+        	signals_.add(SIGTERM);
+#if defined(SIGQUIT)
+        	signals_.add(SIGQUIT);
+#endif // defined(SIGQUIT)
+        	signals_.async_wait(boost::bind(&Proxy::Stop,this));
+*/
+		return;
+	}
+
+	bool Run();
+	void Statistics();
+	void Stop();
+private:
+	void HandleAccept(const boost::system::error_code& error);
+
+	//boost::asio::signal_set signals_;
+        boost::asio::io_service& io_service_;
+        boost::asio::ip::address_v4 localhost_address;
+        boost::asio::ip::tcp::acceptor acceptor_;
+        unsigned short server_port_;
+        std::string server_host_;
+	boost::shared_ptr<Connection> session_;
+	int total_connections;
+};
+
+#endif // FIRESQL_PROXY_H
+
