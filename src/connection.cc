@@ -140,18 +140,9 @@ void Connection::HandleServerRead(const boost::system::error_code& error,const s
                 	boost::bind(&Connection::HandleClientWrite,
                       		shared_from_this(),
                       		boost::asio::placeholders::error));
-		// TODO:This should be on a specific class
-		if(bytes >4) { // There is a mysql header
-			int type_query = server_data_[4];
-			int query_length = server_data_[5];
-			if(type_query == 3 ) {
-        			std::ostringstream os;
-				for(int i = 5;i < bytes;++i) 
-					os << server_data_[i];
-		
-				std::cout << "QUERY(" << os.str() << ")" <<std::endl;
-			}
-		}	
+
+		MysqlDecoder().decode(vdecoder_,boost::asio::buffer(server_data_,bytes));
+			
 	}else{
 		Close();
 	}

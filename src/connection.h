@@ -30,18 +30,15 @@
 #endif
 
 #include <iostream>
-#include <string>
-//#include <array>
-//#include <vector>
+//#include <string>
 #include <sstream>
-//#include <iomanip>
-//#include <algorithm>
 
-//#include <array>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
+
+#include "mysql_decoder.h"
 
 class Connection : public boost::enable_shared_from_this<Connection>
 {
@@ -69,11 +66,10 @@ private:
 	boost::asio::ip::tcp::socket client_socket_;
 
       	enum { max_data_length = 8192 }; //8KB check mysql documentation
-//      	unsigned char server_data_[max_data_length];
- //     	unsigned char client_data_[max_data_length];
 	boost::array<unsigned char,max_data_length> server_data_;
 	boost::array<unsigned char,max_data_length> client_data_;
       	boost::mutex mutex_;
+	VisitorDecoder vdecoder_;
 };
 
 #endif // FIRESQL_CONNECTION_H
