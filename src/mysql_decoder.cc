@@ -26,23 +26,93 @@
 #include <sstream>
 #include "mysql_decoder.h"
 
-void MysqlDecoder::decode(VisitorDecoder &v,boost::asio::mutable_buffers_1 buffer) {
+MysqlDecoder::MysqlDecoder():
+	total_decode_queries_(0),
+	total_bogus_queries_(0)	
+{}
+
+int MysqlDecoder::GetIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset)
+{
+	int off = *offset;
+	int ret = 0;
+	unsigned char *bytestream = packet;
+
+	if(off >= packet_len) 
+		return 0;
+	if(bytestream[off] <= 251) { 
+		ret = bytestream[off];
+		off += 1; // 
+	}else if (bytestream[off] == 252) { // 2 bytes length 
+		if(off+2 >= packet_len) 
+			return 0;
+		ret = (bytestream[off +1 ] << 0 ) | 
+			( bytestream[off +2] <<8);
+		off += 2;
+	}else if (bytestream[off] == 253) { // 3 bytes length
+		if(off+3 >= packet_len) 
+			return 0;
+
+		ret = (bytestream[off + 1] << 0) |
+			(bytestream[off + 2] << 8) |
+			(bytestream[off + 3] << 16);
+		off += 3;
+	}else if(bytestream[off] == 254) { // 8 bytes length
+		if(off + 8 >= packet_len)
+			return 0;
+		ret = (bytestream[off + 5] << 0) |
+			(bytestream[off + 6] << 8) |
+			(bytestream[off + 7] << 16) |
+			(bytestream[off + 8] << 24);
+		ret <<= 32;
+
+		ret |= (bytestream[off + 1] <<  0) | 
+			(bytestream[off + 2] <<  8) |
+			(bytestream[off + 3] << 16) |
+			(bytestream[off + 4] << 24);
+		off += 8;
+	}else {
+		ret = -1;
+	}		
+
+	off += 1;
+
+	*offset = off;
+	return ret;
+}
+
+void MysqlDecoder::decode(VisitorDecoder &v,boost::asio::mutable_buffers_1 buffer) 
+{
 	std::size_t bytes = boost::asio::buffer_size(buffer);
-	unsigned char* ptr = boost::asio::buffer_cast<unsigned char*>(buffer);
+	unsigned char* packet = boost::asio::buffer_cast<unsigned char*>(buffer);
+
+	if(bytes <= 4) // At least 4 bytes of mysql header 
+		return;
+
+	int offset = 0;
+	int mysql_packet_size = GetIntFromNetworkPacket(packet,bytes,&offset);
+	offset = 3; 
+	int packet_number = packet[offset];
+
+	offset ++;
+	int type_query = packet[offset];
 
 #ifdef DEBUG
-        std::cout << __FILE__ << ":"<< __FUNCTION__ << ":bytes:"<< bytes <<std::endl;
+        std::cout << __FILE__ << ":"<< __FUNCTION__ << ":bytes:"<< bytes;
+        std::cout << " mysqllen:"<< mysql_packet_size;
+        std::cout << " querytype:"<< type_query;
+        std::cout << " offset:"<< offset+1 << std::endl;
 #endif
-	if(bytes >4) { // There is a mysql header
-        	int type_query = ptr[4];
-                int query_length = ptr[5];
-                if(type_query == 3 ) {
-                	std::ostringstream os;
-                        for(int i = 5;i < bytes;++i)
-                        	os << ptr[i];
 
-                        std::cout << "QUERY(" << os.str() << ")" <<std::endl;
-                }
+	// type_query == 5 is for authenticated, the username can be retrieve	
+        if((type_query >=3 )&&(type_query <=4)) {
+               	std::ostringstream os;
+		offset++;
+                for(int i = offset;i < bytes;++i)
+                      	os << packet[i];
+		++total_decode_queries_;
+                std::cout << "Query(" << os.str() << ")type("<< type_query <<")" <<std::endl;
+	}else{
+		++total_bogus_queries_;
 	}
 
         v.decode(*this,buffer);

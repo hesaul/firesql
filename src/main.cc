@@ -21,9 +21,19 @@
  * Written by Luis Campo Giralte <luis.camp0.2009@gmail.com> 2012
  *
  */
-
+#include <csignal>
 #include "proxy.h"
 #include <boost/asio.hpp>
+
+Proxy *proxy;
+
+void signalHandler( int signum )
+{
+	proxy->Stop();
+	proxy->Statistics();
+
+	exit(signum);  
+}
 
 int main(int argc, char* argv[])
 {
@@ -40,21 +50,13 @@ int main(int argc, char* argv[])
 
    	boost::asio::io_service ios;
 
-/*
-	boost::asio::signal_set signals(ios);
-	signals.add(SIGINT);
-  	signals.add(SIGTERM);
-#if defined(SIGQUIT)
-	signals.add(SIGQUIT);
-#endif 
-  	signals.async_wait(boost::bind(
-      		&boost::asio::io_service::stop, &ios));
-*/
+    	signal(SIGINT, signalHandler);  
+
    	try
    	{
-		Proxy proxy(ios,local_host,local_port,forward_host,forward_port);
+		proxy = new Proxy(ios,local_host,local_port,forward_host,forward_port);
 
-		proxy.Run();
+		proxy->Run();
 		ios.run();
    	}
    	catch(std::exception& e)

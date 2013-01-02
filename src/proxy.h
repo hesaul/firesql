@@ -40,21 +40,12 @@ public:
         	const std::string& local_host, unsigned short local_port,
                 const std::string& server_host, unsigned short server_port)
         	: io_service_(io_service),
-//		signals_(io_service),
            	localhost_address(boost::asio::ip::address_v4::from_string(local_host)),
            	acceptor_(io_service_,boost::asio::ip::tcp::endpoint(localhost_address,local_port)),
            	server_port_(server_port),
            	server_host_(server_host),
 		total_connections(0)
 	{
-/* 
-      		signals_.add(SIGINT);
-        	signals_.add(SIGTERM);
-#if defined(SIGQUIT)
-        	signals_.add(SIGQUIT);
-#endif // defined(SIGQUIT)
-        	signals_.async_wait(boost::bind(&Proxy::Stop,this));
-*/
 		return;
 	}
 
@@ -64,7 +55,6 @@ public:
 private:
 	void HandleAccept(const boost::system::error_code& error);
 
-	//boost::asio::signal_set signals_;
         boost::asio::io_service& io_service_;
         boost::asio::ip::address_v4 localhost_address;
         boost::asio::ip::tcp::acceptor acceptor_;
@@ -72,6 +62,7 @@ private:
         std::string server_host_;
 	boost::shared_ptr<Connection> session_;
 	int total_connections;
+	std::vector<boost::shared_ptr<Connection>> connection_list_;
 };
 
 #endif // FIRESQL_PROXY_H

@@ -24,6 +24,14 @@
 
 #include "connection.h"
 
+
+void Connection::Statistics() 
+{
+	std::cout << "Connection:" << this <<" client ip:" << GetClientIpAddress(); 
+	std::cout << " server bytes:" << total_server_data_bytes_; 
+	std::cout << " client bytes:" << total_client_data_bytes_ <<std::endl; 
+}
+
 boost::asio::ip::tcp::socket& Connection::GetServerSocket()
 {
 	return server_socket_;
@@ -34,18 +42,20 @@ boost::asio::ip::tcp::socket& Connection::GetClientSocket()
 	return client_socket_;
 }
 
-void Connection::Start(const std::string& client_host, unsigned short client_port)
+void Connection::Start(const std::string& server_host, unsigned short server_port)
 {
 #ifdef DEBUG
-	std::cout << __FILE__ << ":"<< __FUNCTION__ <<":"<< client_host <<":"<< client_port <<std::endl;
+	std::cout << __FILE__ << ":"<< __FUNCTION__ <<":"<< server_host <<":"<< server_port <<std::endl;
 #endif
         client_socket_.async_connect(
         	boost::asio::ip::tcp::endpoint(
-                	boost::asio::ip::address::from_string(client_host),
-                   	client_port),
+                	boost::asio::ip::address::from_string(server_host),
+                   	server_port),
                	boost::bind(&Connection::HandleServerConnect,
                 	shared_from_this(),
                     	boost::asio::placeholders::error));
+
+	client_ip_ = boost::lexical_cast<std::string>(server_socket_.remote_endpoint());
 	return;
 }
 
@@ -76,6 +86,9 @@ void Connection::HandleServerConnect(const boost::system::error_code& error)
 
 void Connection::HandleClientWrite(const boost::system::error_code& error)
 {
+#ifdef DEBUG
+        std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
+#endif
 	if (!error)
         {
         	server_socket_.async_read_some(
@@ -105,6 +118,7 @@ void Connection::HandleClientRead(const boost::system::error_code& error,const s
                   	boost::bind(&Connection::HandleServerWrite,
                         	shared_from_this(),
                         	boost::asio::placeholders::error));
+		total_server_data_bytes_ += bytes;
 	}else{
 		Close();
 	}
@@ -113,6 +127,9 @@ void Connection::HandleClientRead(const boost::system::error_code& error,const s
 
 void Connection::HandleServerWrite(const boost::system::error_code& error)
 {
+#ifdef DEBUG
+        std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
+#endif
         if (!error)
         {
         	client_socket_.async_read_some(
@@ -142,7 +159,7 @@ void Connection::HandleServerRead(const boost::system::error_code& error,const s
                       		boost::asio::placeholders::error));
 
 		MysqlDecoder().decode(vdecoder_,boost::asio::buffer(server_data_,bytes));
-			
+		total_client_data_bytes_ += bytes;
 	}else{
 		Close();
 	}

@@ -34,11 +34,17 @@
 class MysqlDecoder: public Decoder 
 {
 public:
-	MysqlDecoder() {}
+	MysqlDecoder(); 
 	virtual ~MysqlDecoder() {}	
 
 	virtual void decode(VisitorDecoder & v,boost::asio::mutable_buffers_1 buffer);
- 
+	
+	int32_t GetTotalDecodeQueries() { return total_decode_queries_;}
+	int32_t GetTotalBogusQueries() { return total_bogus_queries_;}
+private:
+	int GetIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset); 
+	int32_t total_decode_queries_;
+	int32_t total_bogus_queries_;
 };
 
 #endif // FIRESQL_MYSQL_DECODER_H

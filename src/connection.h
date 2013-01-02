@@ -30,10 +30,10 @@
 #endif
 
 #include <iostream>
-//#include <string>
 #include <sstream>
-
+#include <boost/lexical_cast.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
@@ -45,14 +45,23 @@ class Connection : public boost::enable_shared_from_this<Connection>
 public:
 	explicit Connection(boost::asio::io_service& ios):
 		server_socket_(ios),
-		client_socket_(ios)
-	{}
+		client_socket_(ios),
+		total_server_data_bytes_(0),
+		total_client_data_bytes_(0)
+	{
+	}
 
 	boost::asio::ip::tcp::socket& GetServerSocket();
 	boost::asio::ip::tcp::socket& GetClientSocket();
 
 	void Start(const std::string& server_host, unsigned short server_port);
 	void HandleServerConnect(const boost::system::error_code& error);
+	void Statistics();
+	
+	int32_t GetTotalServerBytes() { return total_server_data_bytes_; };
+	int32_t GetTotalClientBytes() { return total_client_data_bytes_; };
+	const std::string &GetClientIpAddress() { return client_ip_;};
+
 private:
 
 	void HandleServerWrite(const boost::system::error_code& error);
@@ -70,6 +79,10 @@ private:
 	boost::array<unsigned char,max_data_length> client_data_;
       	boost::mutex mutex_;
 	VisitorDecoder vdecoder_;
+
+	std::string client_ip_;
+	int32_t total_server_data_bytes_;
+	int32_t total_client_data_bytes_;
 };
 
 #endif // FIRESQL_CONNECTION_H

@@ -32,8 +32,25 @@ void Proxy::Stop()
 
 void Proxy::Statistics()
 {
+	int t = 0;
+	int32_t bytes_server = 0;
+	int32_t bytes_client = 0;
+
+	std::cout << "FireSql proxy statistics" <<std::endl;
+
+	// A cool lambda function 
+	std::for_each(connection_list_.begin(), 
+		connection_list_.end(), [&](boost::shared_ptr<Connection>& it)
+	{ 
+		it->Statistics();
+		bytes_server += it->GetTotalServerBytes();
+		bytes_client += it->GetTotalClientBytes();
+	});
+
 	std::cout << "Statistics" <<std::endl;
 	std::cout << "\tconnections:" << total_connections <<std::endl;
+	std::cout << "\tserver bytes:" << bytes_server <<std::endl;
+	std::cout << "\tclient bytes:" << bytes_client <<std::endl;
 	return;
 }
 
@@ -69,6 +86,8 @@ bool Proxy::Run()
                 	boost::bind(&Proxy::HandleAccept,
                         	this,
                          	boost::asio::placeholders::error));
+
+		connection_list_.push_back(session_);
 
         }catch(std::exception& e){
                std::cerr << "acceptor exception: " << e.what() << std::endl;
