@@ -67,14 +67,14 @@ void Connection::HandleServerConnect(const boost::system::error_code& error)
         if (!error) {
         	server_socket_.async_read_some(
                 	boost::asio::buffer(server_data_,max_data_length),
-                 	boost::bind(&Connection::HandleServerRead,
+                 	boost::bind(&Connection::ReadFromClient,
                       		shared_from_this(),
                       		boost::asio::placeholders::error,
                       		boost::asio::placeholders::bytes_transferred));
 
             	client_socket_.async_read_some(
                 	boost::asio::buffer(client_data_,max_data_length),
-                 	boost::bind(&Connection::HandleClientRead,
+                 	boost::bind(&Connection::ReadFromServer,
                       		shared_from_this(),
                       		boost::asio::placeholders::error,
                       		boost::asio::placeholders::bytes_transferred));
@@ -84,16 +84,13 @@ void Connection::HandleServerConnect(const boost::system::error_code& error)
 	return;
 }
 
-void Connection::HandleClientWrite(const boost::system::error_code& error)
+void Connection::WriteToServer(const boost::system::error_code& error)
 {
-#ifdef DEBUG
-        std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
-#endif
 	if (!error)
         {
         	server_socket_.async_read_some(
                 	boost::asio::buffer(server_data_,max_data_length),
-                 	boost::bind(&Connection::HandleServerRead,
+                 	boost::bind(&Connection::ReadFromClient,
                       		shared_from_this(),
                       		boost::asio::placeholders::error,
                       		boost::asio::placeholders::bytes_transferred));
@@ -106,7 +103,7 @@ void Connection::HandleClientWrite(const boost::system::error_code& error)
 
 
 // TODO: Hooks for the server response, this function have the response of the server
-void Connection::HandleClientRead(const boost::system::error_code& error,const size_t& bytes)
+void Connection::ReadFromServer(const boost::system::error_code& error,const size_t& bytes)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":bytes:"<<bytes <<std::endl;
@@ -115,7 +112,7 @@ void Connection::HandleClientRead(const boost::system::error_code& error,const s
         {
         	async_write(server_socket_,
                 	boost::asio::buffer(client_data_,bytes),
-                  	boost::bind(&Connection::HandleServerWrite,
+                  	boost::bind(&Connection::WriteToClient,
                         	shared_from_this(),
                         	boost::asio::placeholders::error));
 		total_server_data_bytes_ += bytes;
@@ -125,16 +122,13 @@ void Connection::HandleClientRead(const boost::system::error_code& error,const s
 	return;
 }
 
-void Connection::HandleServerWrite(const boost::system::error_code& error)
+void Connection::WriteToClient(const boost::system::error_code& error)
 {
-#ifdef DEBUG
-        std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
-#endif
         if (!error)
         {
         	client_socket_.async_read_some(
                  	boost::asio::buffer(client_data_,max_data_length),
-                 	boost::bind(&Connection::HandleClientRead,
+                 	boost::bind(&Connection::ReadFromServer,
                       		shared_from_this(),
                       		boost::asio::placeholders::error,
                       		boost::asio::placeholders::bytes_transferred));
@@ -145,7 +139,7 @@ void Connection::HandleServerWrite(const boost::system::error_code& error)
 }
 
 // TODO: hooks for the clients queryes
-void Connection::HandleServerRead(const boost::system::error_code& error,const size_t& bytes)
+void Connection::ReadFromClient(const boost::system::error_code& error,const size_t& bytes)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":bytes:"<<bytes <<std::endl;
@@ -154,7 +148,7 @@ void Connection::HandleServerRead(const boost::system::error_code& error,const s
         {
         	async_write(client_socket_,
                 	boost::asio::buffer(server_data_,bytes),
-                	boost::bind(&Connection::HandleClientWrite,
+                	boost::bind(&Connection::WriteToServer,
                       		shared_from_this(),
                       		boost::asio::placeholders::error));
 

@@ -64,10 +64,10 @@ public:
 
 private:
 
-	void HandleServerWrite(const boost::system::error_code& error);
-	void HandleServerRead(const boost::system::error_code& error,const size_t& bytes);
-	void HandleClientWrite(const boost::system::error_code& error);
-	void HandleClientRead(const boost::system::error_code& error,const size_t& bytes);
+	void WriteToClient(const boost::system::error_code& error);
+	void ReadFromClient(const boost::system::error_code& error,const size_t& bytes);
+	void WriteToServer(const boost::system::error_code& error);
+	void ReadFromServer(const boost::system::error_code& error,const size_t& bytes);
 
 	void Close();
 
