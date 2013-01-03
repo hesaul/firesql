@@ -12,7 +12,7 @@ firesql_SOURCES = 	mysql_decoder.cc \
 			main.cc
 
 firesql_CPPFLAGS = $(BOOST_CPPFLAGS)
-firesql_LDFLAGS = -lpthread -lstdc++ -lboost_system -lboost_thread
+firesql_LDFLAGS = -lpthread -lstdc++ -lboost_system -lboost_thread -lboost_program_options
 firesql_LDADD = $(BOOST_LIBS)
 
 bin_PROGRAMS = firesql

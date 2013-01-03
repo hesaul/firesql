@@ -21,11 +21,65 @@
  * Written by Luis Campo Giralte <luis.camp0.2009@gmail.com> 2012
  *
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <csignal>
 #include "proxy.h"
 #include <boost/asio.hpp>
+#include <boost/program_options.hpp>
 
 Proxy *proxy;
+
+bool process_command_line(int argc, char **argv,
+	std::string &local_address,
+	unsigned short &local_port,
+	std::string &remote_address,
+	unsigned short &remote_port)
+{
+	namespace po = boost::program_options;
+
+	po::options_description desc("FireSql " VERSION " usage", 1024, 512);
+	try
+	{
+		desc.add_options()
+			("help",     "show help")
+          		("localip,l",   po::value<std::string>(&local_address)->required(),
+				"set the local address of the proxy")
+          		("localport,p",   po::value<unsigned short>(&local_port)->required(),
+				"set the local port of the proxy")
+          		("remoteip,r", po::value<std::string>(&remote_address)->required(), 
+				"set the remote address of the database")
+          		("remoteport,q", po::value<unsigned short>(&remote_port)->required(), 
+				"set the remote port of the database")
+        	;
+		po::variables_map vm;
+        	po::store(po::parse_command_line(argc, argv, desc), vm);
+
+        	if (vm.count("help"))
+        	{
+            		std::cout << desc << "\n";
+            		return false;
+        	}
+
+        	po::notify(vm);
+    	}
+	catch(boost::program_options::required_option& e)
+    	{
+        	std::cerr << "Error: " << e.what() << std::endl;
+		std::cout << desc << std::endl;
+        	return false;
+    	}
+    	catch(...)
+    	{
+        	std::cerr << "Unknown error!" << std::endl;
+        	return false;
+    	}
+
+
+	return true;
+}
 
 void signalHandler( int signum )
 {
@@ -37,16 +91,20 @@ void signalHandler( int signum )
 
 int main(int argc, char* argv[])
 {
-	if (argc != 5)
-   	{
-      		std::cerr << "usage:"<< argv[0] <<" <local ip> <local port> <server ip> <server port>" << std::endl;
-      		return 1;
-   	}
-
-	const unsigned short local_port   = static_cast<unsigned short>(::atoi(argv[2]));
+/*	const unsigned short local_port   = static_cast<unsigned short>(::atoi(argv[2]));
    	const unsigned short forward_port = static_cast<unsigned short>(::atoi(argv[4]));
    	const std::string local_host      = argv[1];
    	const std::string forward_host    = argv[3];
+*/
+	std::string local_host;
+	std::string remote_host;
+	unsigned short local_port;
+	unsigned short remote_port;
+
+	if(!process_command_line(argc,argv,local_host,local_port,remote_host,remote_port))
+	{
+		return 1;
+	}
 
    	boost::asio::io_service ios;
 
@@ -54,7 +112,7 @@ int main(int argc, char* argv[])
 
    	try
    	{
-		proxy = new Proxy(ios,local_host,local_port,forward_host,forward_port);
+		proxy = new Proxy(ios,local_host,local_port,remote_host,remote_port);
 
 		proxy->Run();
 		ios.run();
