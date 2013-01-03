@@ -29,18 +29,20 @@
 #include <config.h>
 #endif
 
-#include "visitor_decoder.h"
+#include <boost/asio/buffer.hpp>
+#include "singleton.h"
 
-class MysqlDecoder: public Decoder 
+template <class T> T*  Singleton<T>::instance_ = nullptr;
+class MysqlDecoder: public Singleton<MysqlDecoder>
 {
 public:
-	MysqlDecoder(); 
-	virtual ~MysqlDecoder() {}	
+	void decode(boost::asio::mutable_buffers_1 buffer);
 
-	virtual void decode(VisitorDecoder & v,boost::asio::mutable_buffers_1 buffer);
-	
 	int32_t GetTotalDecodeQueries() { return total_decode_queries_;}
 	int32_t GetTotalBogusQueries() { return total_bogus_queries_;}
+
+	friend class Singleton<MysqlDecoder>;
+
 private:
 	int GetIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset); 
 	int32_t total_decode_queries_;

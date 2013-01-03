@@ -26,11 +26,6 @@
 #include <sstream>
 #include "mysql_decoder.h"
 
-MysqlDecoder::MysqlDecoder():
-	total_decode_queries_(0),
-	total_bogus_queries_(0)	
-{}
-
 int MysqlDecoder::GetIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset)
 {
 	int off = *offset;
@@ -80,7 +75,7 @@ int MysqlDecoder::GetIntFromNetworkPacket(unsigned char *packet,int packet_len,i
 	return ret;
 }
 
-void MysqlDecoder::decode(VisitorDecoder &v,boost::asio::mutable_buffers_1 buffer) 
+void MysqlDecoder::decode(boost::asio::mutable_buffers_1 buffer) 
 {
 	std::size_t bytes = boost::asio::buffer_size(buffer);
 	unsigned char* packet = boost::asio::buffer_cast<unsigned char*>(buffer);
@@ -114,7 +109,6 @@ void MysqlDecoder::decode(VisitorDecoder &v,boost::asio::mutable_buffers_1 buffe
 	}else{
 		++total_bogus_queries_;
 	}
-
-        v.decode(*this,buffer);
+	return;
 }
 

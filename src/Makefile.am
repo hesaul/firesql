@@ -2,9 +2,8 @@ AUTOMAKE_OPTIONS = gnu
 
 noinst_HEADERS =	connection.h \
 			proxy.h \
-			decoder.h \
 			mysql_decoder.h \
-			visitor_decoder.h
+			singleton.h 
 
 firesql_SOURCES = 	mysql_decoder.cc \
 			connection.cc \

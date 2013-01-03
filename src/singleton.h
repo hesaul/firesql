@@ -22,38 +22,38 @@
  *
  */
 
-#ifndef FIRESQL_VISITOR_DECODER_H
-#define FIRESQL_VISITOR_DECODER_H
+#ifndef FIRESQL_SINGLETON_H
+#define FIRESQL_SINGLETON_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include "decoder.h"
+#include <iostream>
 
-class MysqlDecoder;
-
-class VisitorDecoder
+template <class T>
+class Singleton
 {
 public:
-    	VisitorDecoder() {}
-    	virtual ~VisitorDecoder() {}
-
-	virtual void decode(const Decoder &d, boost::asio::mutable_buffers_1 buffer)
+	template <typename... Args>
+  	
+	static T* GetInstance() 
 	{
-#ifdef DEBUG
-		std::cout << __FILE__ << ":"<< __FUNCTION__ <<":Decoder" <<std::endl;
-#endif
+		if(!instance_)
+		{
+			instance_ = new T();
+		}
+		return instance_;
 	}
 
-	virtual void decode(const MysqlDecoder &d, boost::asio::mutable_buffers_1 buffer)
+	static void DestroyInstance() 
 	{
-#ifdef DEBUG
-		std::cout << __FILE__ << ":"<< __FUNCTION__ <<":MysqlDecoder" <<std::endl;
-#endif
+		delete instance_;
+		instance_ = nullptr;
 	}
+
+private:
+	static T* instance_;
 };
 
-
-#endif // FIRESQL_VISITOR_DECODER_H
-
+#endif // FIRESQL_SINGLETON_H

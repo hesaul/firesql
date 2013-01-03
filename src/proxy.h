@@ -32,6 +32,7 @@
 #include <cstddef>
 #include <boost/asio.hpp>
 #include "connection.h"
+#include "mysql_decoder.h"
 
 class Proxy
 {

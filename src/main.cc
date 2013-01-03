@@ -85,17 +85,12 @@ void signalHandler( int signum )
 {
 	proxy->Stop();
 	proxy->Statistics();
-
+	MysqlDecoder::DestroyInstance();
 	exit(signum);  
 }
 
 int main(int argc, char* argv[])
 {
-/*	const unsigned short local_port   = static_cast<unsigned short>(::atoi(argv[2]));
-   	const unsigned short forward_port = static_cast<unsigned short>(::atoi(argv[4]));
-   	const std::string local_host      = argv[1];
-   	const std::string forward_host    = argv[3];
-*/
 	std::string local_host;
 	std::string remote_host;
 	unsigned short local_port;

@@ -78,7 +78,6 @@ private:
 	boost::array<unsigned char,max_data_length> server_data_;
 	boost::array<unsigned char,max_data_length> client_data_;
       	boost::mutex mutex_;
-	VisitorDecoder vdecoder_;
 
 	std::string client_ip_;
 	int32_t total_server_data_bytes_;
