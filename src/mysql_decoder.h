@@ -45,6 +45,7 @@ public:
 
 private:
 	int GetIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset); 
+	std::string GetUser(unsigned char *buffer,int buffer_len);
 	int32_t total_decode_queries_;
 	int32_t total_bogus_queries_;
 };

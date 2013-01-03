@@ -106,9 +106,38 @@ void MysqlDecoder::decode(boost::asio::mutable_buffers_1 buffer)
                       	os << packet[i];
 		++total_decode_queries_;
                 std::cout << "Query(" << os.str() << ")type("<< type_query <<")" <<std::endl;
+	}else if (type_query == 5) {
+		std::cout << "User:" << GetUser(&packet[offset],mysql_packet_size) << std::endl;
 	}else{
 		++total_bogus_queries_;
 	}
 	return;
 }
 
+// Type query equals 5 is for autenticate the user
+// Login request 
+//   Client Capabilities 2 bytes
+//   Extended Client Capabilities 2 bytes
+//   Max packet 4 bytes
+//   Charset 1 byte
+//   Username 30 bytes aprox 
+//   Password hashed 
+std::string MysqlDecoder::GetUser(unsigned char *buffer,int buffer_len)
+{
+	std::string user("none");
+	unsigned char *pointer = buffer;
+
+	if(buffer_len <= 30) 
+		return user;	
+
+	std::ostringstream os;
+
+	pointer = &buffer[9];
+	for (int i = 0; i < 30;++i) 
+	{
+		//std::cout << "*";
+		os << pointer[i];
+	}
+
+	return os.str();
+}

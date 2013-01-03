@@ -27,7 +27,8 @@
 
 void Connection::Statistics() 
 {
-	std::cout << "Connection:" << this <<" client ip:" << GetClientIpAddress(); 
+	std::cout << "Connection:" << this <<" ip:" << GetClientIpAddress();
+	std::cout << " user:" << GetDatabaseUser(); 
 	std::cout << " server bytes:" << total_server_data_bytes_; 
 	std::cout << " client bytes:" << total_client_data_bytes_ <<std::endl; 
 }

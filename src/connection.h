@@ -47,7 +47,8 @@ public:
 		server_socket_(ios),
 		client_socket_(ios),
 		total_server_data_bytes_(0),
-		total_client_data_bytes_(0)
+		total_client_data_bytes_(0),
+		database_user_("none")
 	{
 	}
 
@@ -61,6 +62,7 @@ public:
 	int32_t GetTotalServerBytes() { return total_server_data_bytes_; };
 	int32_t GetTotalClientBytes() { return total_client_data_bytes_; };
 	const std::string &GetClientIpAddress() { return client_ip_;};
+	const std::string &GetDatabaseUser() { return database_user_;};
 
 private:
 
@@ -79,6 +81,7 @@ private:
 	boost::array<unsigned char,max_data_length> client_data_;
       	boost::mutex mutex_;
 
+	std::string database_user_;
 	std::string client_ip_;
 	int32_t total_server_data_bytes_;
 	int32_t total_client_data_bytes_;

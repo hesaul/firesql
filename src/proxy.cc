@@ -69,7 +69,6 @@ void Proxy::HandleAccept(const boost::system::error_code& error)
                	{
                 	std::cerr << "Failure during call to accept." << std::endl;
                	}
-
 	}else{
         	std::cerr << "Error: " << error.message() << std::endl;
         }
