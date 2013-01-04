@@ -31,6 +31,8 @@
 
 #include <cstddef>
 #include <boost/asio.hpp>
+//#include <boost/timer.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "connection.h"
 #include "mysql_decoder.h"
 
@@ -50,12 +52,15 @@ public:
 		return;
 	}
 
+	void Start();
 	bool Run();
 	void Statistics();
 	void Stop();
 private:
 	void HandleAccept(const boost::system::error_code& error);
 
+	boost::posix_time::ptime start_time_;
+	boost::posix_time::ptime end_time_;
         boost::asio::io_service& io_service_;
         boost::asio::ip::address_v4 localhost_address;
         boost::asio::ip::tcp::acceptor acceptor_;

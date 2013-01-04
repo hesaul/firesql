@@ -25,8 +25,16 @@
 #include "connection.h"
 #include "proxy.h"
 
+void Proxy::Start() 
+{
+	start_time_ = boost::posix_time::microsec_clock::local_time();
+	std::cout << "FireSql proxy start" <<std::endl;
+}
+
 void Proxy::Stop()
 {
+	std::cout << "FireSql proxy stop" <<std::endl;
+	end_time_ = boost::posix_time::microsec_clock::local_time();
 	io_service_.stop();
 }
 
@@ -36,6 +44,7 @@ void Proxy::Statistics()
 	int t = 0;
 	int32_t bytes_server = 0;
 	int32_t bytes_client = 0;
+	boost::posix_time::time_duration duration(end_time_ - start_time_);
 
 	std::cout << "FireSql proxy statistics" <<std::endl;
 
@@ -49,6 +58,7 @@ void Proxy::Statistics()
 	});
 
 	std::cout << "Statistics" <<std::endl;
+	std::cout << "\telapsed time:" << duration <<std::endl;	
 	std::cout << "\tconnections:" << total_connections <<std::endl;
 	std::cout << "\tserver bytes:" << bytes_server <<std::endl;
 	std::cout << "\tclient bytes:" << bytes_client <<std::endl;
@@ -65,6 +75,8 @@ void Proxy::HandleAccept(const boost::system::error_code& error)
         if (!error)
         {
         	session_->Start(server_host_,server_port_);
+		connection_list_.push_back(session_);
+		total_connections++;
                	if(!Run())
                	{
                 	std::cerr << "Failure during call to accept." << std::endl;
@@ -83,13 +95,10 @@ bool Proxy::Run()
         try
         {
         	session_ = boost::shared_ptr<Connection>(new Connection(io_service_));
-		total_connections++;
                	acceptor_.async_accept(session_->GetServerSocket(),
                 	boost::bind(&Proxy::HandleAccept,
                         	this,
                          	boost::asio::placeholders::error));
-
-		connection_list_.push_back(session_);
 
         }catch(std::exception& e){
                std::cerr << "acceptor exception: " << e.what() << std::endl;

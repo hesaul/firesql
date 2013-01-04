@@ -153,7 +153,7 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
                       		shared_from_this(),
                       		boost::asio::placeholders::error));
 
-		MysqlDecoder::GetInstance()->decode(boost::asio::buffer(server_data_,bytes));
+		MysqlDecoder::GetInstance()->decode(*this,boost::asio::buffer(server_data_,bytes));
 		total_client_data_bytes_ += bytes;
 	}else{
 		Close();

@@ -75,7 +75,7 @@ int MysqlDecoder::GetIntFromNetworkPacket(unsigned char *packet,int packet_len,i
 	return ret;
 }
 
-void MysqlDecoder::decode(boost::asio::mutable_buffers_1 buffer) 
+void MysqlDecoder::decode(Connection &conn,boost::asio::mutable_buffers_1 buffer) 
 {
 	std::size_t bytes = boost::asio::buffer_size(buffer);
 	unsigned char* packet = boost::asio::buffer_cast<unsigned char*>(buffer);
@@ -106,8 +106,10 @@ void MysqlDecoder::decode(boost::asio::mutable_buffers_1 buffer)
                       	os << packet[i];
 		++total_decode_queries_;
                 std::cout << "Query(" << os.str() << ")type("<< type_query <<")" <<std::endl;
-	}else if (type_query == 5) {
-		std::cout << "User:" << GetUser(&packet[offset],mysql_packet_size) << std::endl;
+	}else if((type_query == 5)||(type_query == 133)) {
+		std::string user_ = GetUser(&packet[offset],mysql_packet_size);		
+		//std::cout << "User:" << user_ << std::endl;
+		conn.SetDatabaseUser(user_);
 	}else{
 		++total_bogus_queries_;
 	}

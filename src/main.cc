@@ -108,7 +108,8 @@ int main(int argc, char* argv[])
    	try
    	{
 		proxy = new Proxy(ios,local_host,local_port,remote_host,remote_port);
-
+		
+		proxy->Start();
 		proxy->Run();
 		ios.run();
    	}

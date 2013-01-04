@@ -31,12 +31,15 @@
 
 #include <boost/asio/buffer.hpp>
 #include "singleton.h"
+#include "connection.h"
+
+class Connection;
 
 template <class T> T*  Singleton<T>::instance_ = nullptr;
 class MysqlDecoder: public Singleton<MysqlDecoder>
 {
 public:
-	void decode(boost::asio::mutable_buffers_1 buffer);
+	void decode(Connection &conn,boost::asio::mutable_buffers_1 buffer);
 
 	int32_t GetTotalDecodeQueries() { return total_decode_queries_;}
 	int32_t GetTotalBogusQueries() { return total_bogus_queries_;}

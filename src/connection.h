@@ -63,7 +63,7 @@ public:
 	int32_t GetTotalClientBytes() { return total_client_data_bytes_; };
 	const std::string &GetClientIpAddress() { return client_ip_;};
 	const std::string &GetDatabaseUser() { return database_user_;};
-
+	void SetDatabaseUser(std::string user) { database_user_ = user; };
 private:
 
 	void WriteToClient(const boost::system::error_code& error);
