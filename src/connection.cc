@@ -147,13 +147,30 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
 #endif
 	if (!error)
         {
+		MysqlDecoder *decoder = MysqlDecoder::GetInstance();
+
         	async_write(client_socket_,
                 	boost::asio::buffer(server_data_,bytes),
                 	boost::bind(&Connection::WriteToServer,
                       		shared_from_this(),
                       		boost::asio::placeholders::error));
 
-		MysqlDecoder::GetInstance()->decode(*this,boost::asio::buffer(server_data_,bytes));
+		decoder->decode(*this,boost::asio::buffer(server_data_,bytes));
+		if(decoder->IsQuery()) 
+		{
+			RuleManager *rulemng = RuleManager::GetInstance();
+	
+			bool result = false;
+			
+			rulemng->Evaluate(decoder->GetQuery(),&result);
+			if(result) 
+			{
+				boost::shared_ptr<Rule> rule = rulemng->GetCurrentRule();
+				std::cout << "Query(" << decoder->GetQuery();
+				std::cout << ")matchs with(" << rule->GetExpression() <<")" <<std::endl;
+			}
+
+		}
 		total_client_data_bytes_ += bytes;
 	}else{
 		Close();

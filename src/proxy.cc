@@ -41,6 +41,7 @@ void Proxy::Stop()
 void Proxy::Statistics()
 {
 	MysqlDecoder *decoder = MysqlDecoder::GetInstance();
+	RuleManager *rules = RuleManager::GetInstance();
 	int t = 0;
 	int32_t bytes_server = 0;
 	int32_t bytes_client = 0;
@@ -64,6 +65,8 @@ void Proxy::Statistics()
 	std::cout << "\tclient bytes:" << bytes_client <<std::endl;
 	std::cout << "\ttotal queries:" << decoder->GetTotalDecodeQueries() <<std::endl;
 	std::cout << "\ttotal bogus queries:" << decoder->GetTotalBogusQueries() <<std::endl;
+	std::cout << "\ttotal rules:" << rules->GetTotalRules() << std::endl;
+	std::cout << "\ttotal matching rules:" << rules->GetTotalMatchingRules() << std::endl;
 	return;
 }
 

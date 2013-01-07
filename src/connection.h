@@ -38,6 +38,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 
+#include "rule_manager.h"
 #include "mysql_decoder.h"
 
 class Connection : public boost::enable_shared_from_this<Connection>
@@ -64,6 +65,7 @@ public:
 	const std::string &GetClientIpAddress() { return client_ip_;};
 	const std::string &GetDatabaseUser() { return database_user_;};
 	void SetDatabaseUser(std::string user) { database_user_ = user; };
+
 private:
 
 	void WriteToClient(const boost::system::error_code& error);

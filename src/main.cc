@@ -36,7 +36,8 @@ bool process_command_line(int argc, char **argv,
 	std::string &local_address,
 	unsigned short &local_port,
 	std::string &remote_address,
-	unsigned short &remote_port)
+	unsigned short &remote_port,
+	std::string &regex_exp)
 {
 	namespace po = boost::program_options;
 
@@ -46,13 +47,15 @@ bool process_command_line(int argc, char **argv,
 		desc.add_options()
 			("help",     "show help")
           		("localip,l",   po::value<std::string>(&local_address)->required(),
-				"set the local address of the proxy")
+				"set the local address of the proxy.")
           		("localport,p",   po::value<unsigned short>(&local_port)->required(),
-				"set the local port of the proxy")
+				"set the local port of the proxy.")
           		("remoteip,r", po::value<std::string>(&remote_address)->required(), 
-				"set the remote address of the database")
+				"set the remote address of the database.")
           		("remoteport,q", po::value<unsigned short>(&remote_port)->required(), 
-				"set the remote port of the database")
+				"set the remote port of the database.")
+          		("regex,R", po::value<std::string>(&regex_exp), 
+				"user a regex for the user queries.")
         	;
 		po::variables_map vm;
         	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -86,6 +89,7 @@ void signalHandler( int signum )
 	proxy->Stop();
 	proxy->Statistics();
 	MysqlDecoder::DestroyInstance();
+	RuleManager::DestroyInstance();
 	exit(signum);  
 }
 
@@ -93,10 +97,11 @@ int main(int argc, char* argv[])
 {
 	std::string local_host;
 	std::string remote_host;
+	std::string regex_exp;
 	unsigned short local_port;
 	unsigned short remote_port;
 
-	if(!process_command_line(argc,argv,local_host,local_port,remote_host,remote_port))
+	if(!process_command_line(argc,argv,local_host,local_port,remote_host,remote_port,regex_exp))
 	{
 		return 1;
 	}
@@ -104,6 +109,9 @@ int main(int argc, char* argv[])
    	boost::asio::io_service ios;
 
     	signal(SIGINT, signalHandler);  
+
+	if(regex_exp.size() >0)
+		RuleManager::GetInstance()->AddRule(regex_exp);
 
    	try
    	{

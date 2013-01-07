@@ -22,38 +22,36 @@
  *
  */
 
-#ifndef FIRESQL_SINGLETON_H
-#define FIRESQL_SINGLETON_H
+#ifndef FIRESQL_RULE_H
+#define FIRESQL_RULE_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <iostream>
+#include <boost/regex.hpp>
 
-template <class T>
-class Singleton
+class Rule
 {
 public:
-	template <typename... Args>
-  	
-	static T* GetInstance() 
+	explicit Rule(std::string exp):
+		expression_(exp),
+		exp_(exp),
+		total_matchs_(0),
+		total_evaluates_(0)
 	{
-		if(!instance_)
-		{
-			instance_ = new T();
-		}
-		return instance_;
 	}
 
-	static void DestroyInstance() 
-	{
-		delete instance_;
-		instance_ = nullptr;
-	}
+	bool Evaluate(const char *query);
+	const std::string &GetExpression() { return expression_;};	
 
 private:
-	static T* instance_;
+	int32_t total_matchs_;
+	int32_t total_evaluates_;
+	std::string expression_;	
+	boost::regex exp_;
+	boost::cmatch what;
 };
 
-#endif // FIRESQL_SINGLETON_H
+#endif // FIRESQL_RULE_H
+

@@ -31,10 +31,10 @@
 
 #include <cstddef>
 #include <boost/asio.hpp>
-//#include <boost/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "connection.h"
 #include "mysql_decoder.h"
+#include "rule_manager.h"
 
 class Proxy
 {

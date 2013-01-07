@@ -90,7 +90,7 @@ void MysqlDecoder::decode(Connection &conn,boost::asio::mutable_buffers_1 buffer
 
 	offset ++;
 	int type_query = packet[offset];
-
+	is_query_ = false;
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ << ":bytes:"<< bytes;
         std::cout << " mysqllen:"<< mysql_packet_size;
@@ -99,18 +99,23 @@ void MysqlDecoder::decode(Connection &conn,boost::asio::mutable_buffers_1 buffer
 #endif
 
 	// type_query == 5 is for authenticated, the username can be retrieve	
-        if((type_query >=3 )&&(type_query <=4)) {
+        if((type_query >=3 )&&(type_query <=4)) 
+	{
                	std::ostringstream os;
 		offset++;
                 for(int i = offset;i < bytes;++i)
                       	os << packet[i];
 		++total_decode_queries_;
-                std::cout << "Query(" << os.str() << ")type("<< type_query <<")" <<std::endl;
-	}else if((type_query == 5)||(type_query == 133)) {
+		is_query_ = true;
+		query_ = os.str();	
+	}
+	else if((type_query == 5)||(type_query == 133)) 
+	{
 		std::string user_ = GetUser(&packet[offset],mysql_packet_size);		
-		//std::cout << "User:" << user_ << std::endl;
 		conn.SetDatabaseUser(user_);
-	}else{
+	}
+	else
+	{
 		++total_bogus_queries_;
 	}
 	return;
@@ -137,7 +142,6 @@ std::string MysqlDecoder::GetUser(unsigned char *buffer,int buffer_len)
 	pointer = &buffer[9];
 	for (int i = 0; i < 30;++i) 
 	{
-		//std::cout << "*";
 		os << pointer[i];
 	}
 

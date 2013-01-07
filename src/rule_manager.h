@@ -22,63 +22,60 @@
  *
  */
 
-#ifndef FIRESQL_MYSQL_DECODER_H
-#define FIRESQL_MYSQL_DECODER_H
+#ifndef FIRESQL_RULE_MANAGER_H
+#define FIRESQL_RULE_MANAGER_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <boost/asio/buffer.hpp>
-#include "connection.h"
-
-class Connection;
+#include <vector>
+#include "rule.h"
 
 template <class T>
-class SingletonDecoder
+class SingletonRuleManager
 {
 public:
         template <typename... Args>
 
         static T* GetInstance()
         {
-                if(!decoderInstance_)
+                if(!ruleMngInstance_)
                 {
-                        decoderInstance_ = new T();
+                        ruleMngInstance_ = new T();
                 }
-                return decoderInstance_;
+                return ruleMngInstance_;
         }
 
         static void DestroyInstance()
         {
-                delete decoderInstance_;
-                decoderInstance_ = nullptr;
+                delete ruleMngInstance_;
+                ruleMngInstance_ = nullptr;
         }
 
 private:
-        static T* decoderInstance_;
+        static T* ruleMngInstance_;
 };
 
-template <class T> T*  SingletonDecoder<T>::decoderInstance_ = nullptr;
-class MysqlDecoder: public SingletonDecoder<MysqlDecoder>
+template <class T> T*  SingletonRuleManager<T>::ruleMngInstance_ = nullptr;
+class RuleManager: public SingletonRuleManager<RuleManager>
 {
 public:
-	void decode(Connection &conn,boost::asio::mutable_buffers_1 buffer);
+	int32_t GetTotalRules() { return total_rules_;}
+	int32_t GetTotalMatchingRules() { return total_matched_rules_;}
 
-	int32_t GetTotalDecodeQueries() { return total_decode_queries_;}
-	int32_t GetTotalBogusQueries() { return total_bogus_queries_;}
-
-	const std::string &GetQuery() { return query_;}
-	friend class SingletonDecoder<MysqlDecoder>;
-	bool IsQuery() { return is_query_;}
+	void Evaluate(const std::string &query,bool *result); 
+	void AddRule(const Rule &r);
+	void AddRule(const std::string expression);
+	void Statistics();
+	boost::shared_ptr<Rule> GetCurrentRule() { return current_rule_;};
+	friend class SingletonRuleManager<RuleManager>;
 private:
-	int GetIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset); 
-	std::string GetUser(unsigned char *buffer,int buffer_len);
-	int32_t total_decode_queries_;
-	int32_t total_bogus_queries_;
-	std::string query_;
-	bool is_query_;
+	int32_t total_rules_;
+	int32_t total_matched_rules_;
+	std::vector<boost::shared_ptr<Rule>> rules_;
+	boost::shared_ptr<Rule> current_rule_;
 };
 
-#endif // FIRESQL_MYSQL_DECODER_H
+#endif // FIRESQL_RULE_MANAGER_H
 
