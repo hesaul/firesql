@@ -4,9 +4,16 @@ noinst_HEADERS =	connection.h \
 			proxy.h \
 			mysql_decoder.h \
 			rule.h \
-			rule_manager.h 
+			rule_manager.h \
+			action_close.h \
+			action_drop.h \
+			action_print.h \
+			action.h 
 
-firesql_SOURCES = 	rule.cc \
+firesql_SOURCES = 	action_drop.cc \
+			action_close.cc \
+			action_print.cc \
+			rule.cc \
 			mysql_decoder.cc \
 			rule_manager.cc \
 			connection.cc \

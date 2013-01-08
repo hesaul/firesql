@@ -113,9 +113,7 @@ void MysqlDecoder::decode(Connection &conn,boost::asio::mutable_buffers_1 buffer
 	{
 		std::string user_ = GetUser(&packet[offset],mysql_packet_size);		
 		conn.SetDatabaseUser(user_);
-	}
-	else
-	{
+	}else{
 		++total_bogus_queries_;
 	}
 	return;

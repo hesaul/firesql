@@ -22,43 +22,18 @@
  *
  */
 
-#ifndef FIRESQL_RULE_H
-#define FIRESQL_RULE_H
+#include "action_print.h"
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "action.h"
-#include <boost/regex.hpp>
-
-class Rule
+void ActionPrint::PreAction(const std::string& query)
 {
-public:
-	explicit Rule(std::string exp):
-		expression_(exp),
-		exp_(exp),
-		total_matchs_(0),
-		total_evaluates_(0)
-	{
-	}
+#ifdef DEBUG
+        std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
+#endif
+}
 
-	virtual ~Rule()=default;
-	bool Evaluate(const char *query);
-	const std::string &GetExpression() { return expression_;};	
-	ActionPtr GetDefaultAction() { return default_action_;};
-	void SetDefaultAction(ActionPtr action) { default_action_ = action;};
 
-private:
-	int32_t total_matchs_;
-	int32_t total_evaluates_;
-	std::string expression_;	
-	boost::regex exp_;
-	boost::cmatch what;
-	ActionPtr default_action_;
-};
-
-typedef boost::shared_ptr<Rule> RulePtr;
-
-#endif // FIRESQL_RULE_H
+void ActionPrint::PostAction(int *code)
+{
+	(*code) = ACTION_CONTINUE;
+}
 

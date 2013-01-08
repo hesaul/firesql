@@ -26,6 +26,7 @@
 #endif
 
 #include <csignal>
+#include "action_close.h"
 #include "proxy.h"
 #include <boost/asio.hpp>
 #include <boost/program_options.hpp>
@@ -111,8 +112,11 @@ int main(int argc, char* argv[])
     	signal(SIGINT, signalHandler);  
 
 	if(regex_exp.size() >0)
-		RuleManager::GetInstance()->AddRule(regex_exp);
+	{
+		ActionPtr action = ActionPtr(new ActionClose());
 
+		RuleManager::GetInstance()->AddRule(regex_exp,action);
+	}
    	try
    	{
 		proxy = new Proxy(ios,local_host,local_port,remote_host,remote_port);

@@ -24,20 +24,31 @@
 
 #include <iostream>
 #include "rule_manager.h"
+#include "action_print.h"
 
-void RuleManager::AddRule(const Rule &r)
+void RuleManager::AddRule(RulePtr rule)
 {
-//	rules_.push_back(r);
+	rules_.push_back(rule);
 	total_rules_ += 1;
 }
 
+
+void RuleManager::AddRule(const std::string expression,ActionPtr action)
+{
+        RulePtr rule = RulePtr(new Rule(expression));
+
+        rule->SetDefaultAction(action);
+        AddRule(rule);
+}
+
+
 void RuleManager::AddRule(const std::string expression)
 {
-	boost::shared_ptr<Rule> rule = boost::shared_ptr<Rule>(new Rule(expression));
+	ActionPtr action = ActionPtr(new ActionPrint()); // the default action
 
-	rules_.push_back(rule);
-	++total_rules_;
+	AddRule(expression,action);
 }
+
 
 void RuleManager::Evaluate(const std::string &query, bool *result)
 {
@@ -54,4 +65,13 @@ void RuleManager::Evaluate(const std::string &query, bool *result)
         });
 
 	return;
+}
+
+ActionPtr RuleManager::GetDefaultAction() 
+{ 
+	if(!default_action_)
+	{
+		default_action_ = ActionPtr(new ActionPrint());
+	}
+	return default_action_;
 }

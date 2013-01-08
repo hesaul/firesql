@@ -66,9 +66,9 @@ private:
         boost::asio::ip::tcp::acceptor acceptor_;
         unsigned short server_port_;
         std::string server_host_;
-	boost::shared_ptr<Connection> session_;
+	ConnectionPtr session_;
 	int total_connections;
-	std::vector<boost::shared_ptr<Connection>> connection_list_;
+	std::vector<ConnectionPtr> connection_list_;
 };
 
 #endif // FIRESQL_PROXY_H

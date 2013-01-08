@@ -38,6 +38,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 
+#include "action.h"
 #include "rule_manager.h"
 #include "mysql_decoder.h"
 
@@ -52,6 +53,8 @@ public:
 		database_user_("none")
 	{
 	}
+
+	virtual ~Connection()=default;
 
 	boost::asio::ip::tcp::socket& GetServerSocket();
 	boost::asio::ip::tcp::socket& GetClientSocket();
@@ -83,10 +86,15 @@ private:
 	boost::array<unsigned char,max_data_length> client_data_;
       	boost::mutex mutex_;
 
+	ActionPtr default_action_;
+
+	std::string user_query_;
 	std::string database_user_;
 	std::string client_ip_;
 	int32_t total_server_data_bytes_;
 	int32_t total_client_data_bytes_;
 };
+
+typedef boost::shared_ptr<Connection> ConnectionPtr;
 
 #endif // FIRESQL_CONNECTION_H

@@ -111,11 +111,24 @@ void Connection::ReadFromServer(const boost::system::error_code& error,const siz
 #endif
         if (!error)
         {
-        	async_write(server_socket_,
-                	boost::asio::buffer(client_data_,bytes),
-                  	boost::bind(&Connection::WriteToClient,
-                        	shared_from_this(),
-                        	boost::asio::placeholders::error));
+		int code = ACTION_CONTINUE;
+                if(default_action_)
+                {
+                        default_action_->PostAction(&code);
+                }
+
+		// a new class shoulbe exist for this
+		if(code == ACTION_CONTINUE) 
+		{
+			async_write(server_socket_,
+				boost::asio::buffer(client_data_,bytes),
+				boost::bind(&Connection::WriteToClient,
+					shared_from_this(),
+					boost::asio::placeholders::error));
+		}else if(code == ACTION_CLOSE) {
+			Close();
+		} 
+		
 		total_server_data_bytes_ += bytes;
 	}else{
 		Close();
@@ -123,6 +136,8 @@ void Connection::ReadFromServer(const boost::system::error_code& error,const siz
 	return;
 }
 
+
+// The proxy writes the response on the client
 void Connection::WriteToClient(const boost::system::error_code& error)
 {
         if (!error)
@@ -165,9 +180,13 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
 			rulemng->Evaluate(decoder->GetQuery(),&result);
 			if(result) 
 			{
-				boost::shared_ptr<Rule> rule = rulemng->GetCurrentRule();
-				std::cout << "Query(" << decoder->GetQuery();
-				std::cout << ")matchs with(" << rule->GetExpression() <<")" <<std::endl;
+				RulePtr rule = rulemng->GetCurrentRule();
+				default_action_ = rule->GetDefaultAction();
+				user_query_ = decoder->GetQuery();
+
+				default_action_->PreAction(user_query_);	
+			}else{
+				default_action_ = rulemng->GetDefaultAction();
 			}
 
 		}

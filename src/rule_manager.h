@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 
+#include "action_print.h"
 #include <vector>
 #include "rule.h"
 
@@ -61,20 +62,26 @@ template <class T> T*  SingletonRuleManager<T>::ruleMngInstance_ = nullptr;
 class RuleManager: public SingletonRuleManager<RuleManager>
 {
 public:
+
 	int32_t GetTotalRules() { return total_rules_;}
 	int32_t GetTotalMatchingRules() { return total_matched_rules_;}
 
 	void Evaluate(const std::string &query,bool *result); 
-	void AddRule(const Rule &r);
+
+	void AddRule(const std::string expression, const ActionPtr action);
 	void AddRule(const std::string expression);
+	void AddRule(const RulePtr rule);
+
 	void Statistics();
-	boost::shared_ptr<Rule> GetCurrentRule() { return current_rule_;};
+	RulePtr GetCurrentRule() { return current_rule_;};
+	ActionPtr GetDefaultAction(); 
 	friend class SingletonRuleManager<RuleManager>;
 private:
 	int32_t total_rules_;
 	int32_t total_matched_rules_;
-	std::vector<boost::shared_ptr<Rule>> rules_;
-	boost::shared_ptr<Rule> current_rule_;
+	std::vector<RulePtr> rules_;
+	RulePtr current_rule_;
+	ActionPtr default_action_;
 };
 
 #endif // FIRESQL_RULE_MANAGER_H

@@ -97,7 +97,7 @@ bool Proxy::Run()
 #endif
         try
         {
-        	session_ = boost::shared_ptr<Connection>(new Connection(io_service_));
+        	session_ = ConnectionPtr(new Connection(io_service_));
                	acceptor_.async_accept(session_->GetServerSocket(),
                 	boost::bind(&Proxy::HandleAccept,
                         	this,
