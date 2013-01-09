@@ -75,18 +75,21 @@ int MysqlDecoder::GetIntFromNetworkPacket(unsigned char *packet,int packet_len,i
 	return ret;
 }
 
-void MysqlDecoder::decode(Connection &conn,boost::asio::mutable_buffers_1 buffer) 
+void MysqlDecoder::Decode(Connection &conn,boost::asio::mutable_buffers_1 buffer) 
 {
 	std::size_t bytes = boost::asio::buffer_size(buffer);
 	unsigned char* packet = boost::asio::buffer_cast<unsigned char*>(buffer);
 
-	if(bytes <= 4) // At least 4 bytes of mysql header 
+	if(bytes < MYSQL_PACKET_HEADER_SIZE ) // At least 4 bytes of mysql header 
 		return;
 
 	int offset = 0;
 	int mysql_packet_size = GetIntFromNetworkPacket(packet,bytes,&offset);
 	offset = 3; 
 	int packet_number = packet[offset];
+
+	if(bytes < MYSQL_PACKET_HEADER_SIZE + mysql_packet_size)
+		return;
 
 	offset ++;
 	int type_query = packet[offset];
@@ -144,4 +147,20 @@ std::string MysqlDecoder::GetUser(unsigned char *buffer,int buffer_len)
 	}
 
 	return os.str();
+}
+
+void MysqlDecoder::Reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,int *bytes)
+{
+        unsigned char* packet = boost::asio::buffer_cast<unsigned char*>(buffer);
+	int mysql_packet_len = 0;
+
+	mysql_packet_len = 8;
+	memcpy(packet+ MYSQL_PACKET_HEADER_SIZE + 1,"\x76\x04\x23\x34\x32\x30\x30\x30",mysql_packet_len);
+
+	memcpy(packet + MYSQL_PACKET_HEADER_SIZE + 1 + mysql_packet_len, "hola",4);
+	mysql_packet_len += 5;
+	// Copy the header
+	memcpy(packet,"\x00\x00\x00\x01\xff",5);	
+	memcpy(packet , &mysql_packet_len, 1);
+	(*bytes) = mysql_packet_len + MYSQL_PACKET_HEADER_SIZE ;
 }

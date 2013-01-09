@@ -8,7 +8,8 @@ noinst_HEADERS =	connection.h \
 			action_close.h \
 			action_drop.h \
 			action_print.h \
-			action.h 
+			action.h \
+			mysqldefs.h 
 
 firesql_SOURCES = 	action_drop.cc \
 			action_close.cc \

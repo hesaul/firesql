@@ -31,6 +31,7 @@
 
 #include <boost/asio/buffer.hpp>
 #include "connection.h"
+#include "mysqldefs.h"
 
 class Connection;
 
@@ -63,7 +64,8 @@ template <class T> T*  SingletonDecoder<T>::decoderInstance_ = nullptr;
 class MysqlDecoder: public SingletonDecoder<MysqlDecoder>
 {
 public:
-	void decode(Connection &conn,boost::asio::mutable_buffers_1 buffer);
+	void Decode(Connection &conn,boost::asio::mutable_buffers_1 buffer);
+	void Reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,int *bytes);
 
 	int32_t GetTotalDecodeQueries() { return total_decode_queries_;}
 	int32_t GetTotalBogusQueries() { return total_bogus_queries_;}

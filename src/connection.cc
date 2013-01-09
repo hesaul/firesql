@@ -35,12 +35,12 @@ void Connection::Statistics()
 
 boost::asio::ip::tcp::socket& Connection::GetServerSocket()
 {
-	return server_socket_;
+	return client_socket_;
 }
 
 boost::asio::ip::tcp::socket& Connection::GetClientSocket()
 {
-	return client_socket_;
+	return server_socket_;
 }
 
 void Connection::Start(const std::string& server_host, unsigned short server_port)
@@ -48,7 +48,7 @@ void Connection::Start(const std::string& server_host, unsigned short server_por
 #ifdef DEBUG
 	std::cout << __FILE__ << ":"<< __FUNCTION__ <<":"<< server_host <<":"<< server_port <<std::endl;
 #endif
-        client_socket_.async_connect(
+        server_socket_.async_connect(
         	boost::asio::ip::tcp::endpoint(
                 	boost::asio::ip::address::from_string(server_host),
                    	server_port),
@@ -56,7 +56,7 @@ void Connection::Start(const std::string& server_host, unsigned short server_por
                 	shared_from_this(),
                     	boost::asio::placeholders::error));
 
-	client_ip_ = boost::lexical_cast<std::string>(server_socket_.remote_endpoint());
+	client_ip_ = boost::lexical_cast<std::string>(client_socket_.remote_endpoint());
 	return;
 }
 
@@ -66,14 +66,14 @@ void Connection::HandleServerConnect(const boost::system::error_code& error)
 	std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
 #endif
         if (!error) {
-        	server_socket_.async_read_some(
+        	client_socket_.async_read_some(
                 	boost::asio::buffer(server_data_,max_data_length),
                  	boost::bind(&Connection::ReadFromClient,
                       		shared_from_this(),
                       		boost::asio::placeholders::error,
                       		boost::asio::placeholders::bytes_transferred));
 
-            	client_socket_.async_read_some(
+            	server_socket_.async_read_some(
                 	boost::asio::buffer(client_data_,max_data_length),
                  	boost::bind(&Connection::ReadFromServer,
                       		shared_from_this(),
@@ -89,7 +89,10 @@ void Connection::WriteToServer(const boost::system::error_code& error)
 {
 	if (!error)
         {
-        	server_socket_.async_read_some(
+#ifdef DEBUG
+	std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
+#endif
+        	client_socket_.async_read_some(
                 	boost::asio::buffer(server_data_,max_data_length),
                  	boost::bind(&Connection::ReadFromClient,
                       		shared_from_this(),
@@ -111,23 +114,12 @@ void Connection::ReadFromServer(const boost::system::error_code& error,const siz
 #endif
         if (!error)
         {
-		int code = ACTION_CONTINUE;
-                if(default_action_)
-                {
-                        default_action_->PostAction(&code);
-                }
-
-		// a new class shoulbe exist for this
-		if(code == ACTION_CONTINUE) 
-		{
-			async_write(server_socket_,
-				boost::asio::buffer(client_data_,bytes),
-				boost::bind(&Connection::WriteToClient,
-					shared_from_this(),
-					boost::asio::placeholders::error));
-		}else if(code == ACTION_CLOSE) {
-			Close();
-		} 
+		// the proxy writes on the client socket
+		async_write(client_socket_,
+			boost::asio::buffer(client_data_,bytes),
+			boost::bind(&Connection::WriteToClient,
+				shared_from_this(),
+				boost::asio::placeholders::error));
 		
 		total_server_data_bytes_ += bytes;
 	}else{
@@ -142,7 +134,10 @@ void Connection::WriteToClient(const boost::system::error_code& error)
 {
         if (!error)
         {
-        	client_socket_.async_read_some(
+#ifdef DEBUG
+	std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
+#endif
+        	server_socket_.async_read_some(
                  	boost::asio::buffer(client_data_,max_data_length),
                  	boost::bind(&Connection::ReadFromServer,
                       		shared_from_this(),
@@ -164,32 +159,46 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
         {
 		MysqlDecoder *decoder = MysqlDecoder::GetInstance();
 
-        	async_write(client_socket_,
-                	boost::asio::buffer(server_data_,bytes),
-                	boost::bind(&Connection::WriteToServer,
-                      		shared_from_this(),
-                      		boost::asio::placeholders::error));
-
-		decoder->decode(*this,boost::asio::buffer(server_data_,bytes));
+		// Decode the server_data_ buffer write from the client
+		// to verify it.
+		decoder->Decode(*this,boost::asio::buffer(server_data_,bytes));
 		if(decoder->IsQuery()) 
 		{
 			RuleManager *rulemng = RuleManager::GetInstance();
-	
 			bool result = false;
 			
 			rulemng->Evaluate(decoder->GetQuery(),&result);
 			if(result) 
 			{
 				RulePtr rule = rulemng->GetCurrentRule();
+				int response_size = 0;
+
 				default_action_ = rule->GetDefaultAction();
 				user_query_ = decoder->GetQuery();
 
-				default_action_->PreAction(user_query_);	
+				decoder->Reject(*this,boost::asio::buffer(client_data_,bytes),&response_size);
+			
+				// TODO: find other way	
+				//boost::asio::write(client_socket_,
+				//async_write(client_socket_,
+				//	boost::asio::buffer(client_data_,response_size));//,
+					//boost::bind(&Connection::WriteToClient,
+					//	shared_from_this(),
+					//	boost::asio::placeholders::error));
+
+				default_action_->PreAction(user_query_);
+				return;	
 			}else{
 				default_action_ = rulemng->GetDefaultAction();
 			}
-
 		}
+		// write to the server
+		async_write(server_socket_,
+			boost::asio::buffer(server_data_,bytes),
+			boost::bind(&Connection::WriteToServer,
+				shared_from_this(),
+				boost::asio::placeholders::error));
+		
 		total_client_data_bytes_ += bytes;
 	}else{
 		Close();
@@ -203,10 +212,10 @@ void Connection::Close()
 	std::cout << __FUNCTION__ <<std::endl;
 #endif
 	boost::mutex::scoped_lock lock(mutex_);
-        if (server_socket_.is_open())
-        	server_socket_.close();
         if (client_socket_.is_open())
         	client_socket_.close();
+        if (server_socket_.is_open())
+        	server_socket_.close();
 	return;
 }
 
