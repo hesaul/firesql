@@ -149,6 +149,29 @@ void Connection::WriteToClient(const boost::system::error_code& error)
 	return;
 }
 
+// The proxy writes the response on the client but need to wait for new queries
+void Connection::WriteToClientResponse(const boost::system::error_code& error)
+{
+        if (!error)
+        {
+#ifdef DEBUG
+        	std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
+#endif
+                client_socket_.async_read_some(
+                       	boost::asio::buffer(server_data_,max_data_length),
+                        boost::bind(&Connection::ReadFromClient,
+                                shared_from_this(),
+                                boost::asio::placeholders::error,
+                                boost::asio::placeholders::bytes_transferred));
+        }else{
+                Close();
+        }
+        return;
+}
+
+
+
+
 // TODO: hooks for the clients queryes
 void Connection::ReadFromClient(const boost::system::error_code& error,const size_t& bytes)
 {
@@ -158,6 +181,7 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
 	if (!error)
         {
 		MysqlDecoder *decoder = MysqlDecoder::GetInstance();
+		int action = ACTION_CONTINUE;
 
 		// Decode the server_data_ buffer write from the client
 		// to verify it.
@@ -171,35 +195,42 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
 			if(result) 
 			{
 				RulePtr rule = rulemng->GetCurrentRule();
-				int response_size = 0;
-
-				default_action_ = rule->GetDefaultAction();
+				
 				user_query_ = decoder->GetQuery();
+				default_action_ = rule->GetDefaultAction();
+				default_action_->PreAction(user_query_,&action);
 
-				decoder->Reject(*this,boost::asio::buffer(client_data_,bytes),&response_size);
-			
-				// TODO: find other way	
-				//boost::asio::write(client_socket_,
-				//async_write(client_socket_,
-				//	boost::asio::buffer(client_data_,response_size));//,
-					//boost::bind(&Connection::WriteToClient,
-					//	shared_from_this(),
-					//	boost::asio::placeholders::error));
+				if(action == ACTION_CLOSE) 
+				{
+					Close();
+				}else if(action == ACTION_REJECT) {
+					int response_size = 0;
 
-				default_action_->PreAction(user_query_);
-				return;	
+					decoder->Reject(*this,boost::asio::buffer(client_data_,bytes),&response_size);
+		
+					/* Write on the client_socket_ a mysql error packet */	
+					async_write(client_socket_,
+						boost::asio::buffer(client_data_,response_size),
+						boost::bind(&Connection::WriteToClientResponse,
+							shared_from_this(),
+							boost::asio::placeholders::error));
+				}
 			}else{
 				default_action_ = rulemng->GetDefaultAction();
 			}
 		}
-		// write to the server
-		async_write(server_socket_,
-			boost::asio::buffer(server_data_,bytes),
-			boost::bind(&Connection::WriteToServer,
-				shared_from_this(),
-				boost::asio::placeholders::error));
-		
-		total_client_data_bytes_ += bytes;
+
+		if(action == ACTION_CONTINUE) 
+		{
+			// write to the server
+			async_write(server_socket_,
+				boost::asio::buffer(server_data_,bytes),
+				boost::bind(&Connection::WriteToServer,
+					shared_from_this(),
+					boost::asio::placeholders::error));
+			
+			total_client_data_bytes_ += bytes;
+		}
 	}else{
 		Close();
 	}

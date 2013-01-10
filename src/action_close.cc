@@ -24,11 +24,12 @@
 
 #include "action_close.h"
 
-void ActionClose::PreAction(const std::string& query)
+void ActionClose::PreAction(const std::string& query,int *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
 #endif
+	(*code) = ACTION_CLOSE;
 }
 
 

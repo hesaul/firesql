@@ -24,11 +24,12 @@
 
 #include "action_print.h"
 
-void ActionPrint::PreAction(const std::string& query)
+void ActionPrint::PreAction(const std::string& query,int *code)
 {
-#ifdef DEBUG
-        std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
-#endif
+
+        std::cout << "Query matchs("<< query << ")" <<std::endl;
+	
+	(*code) = ACTION_CONTINUE;
 }
 
 

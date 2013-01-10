@@ -24,11 +24,12 @@
 
 #include "action_drop.h"
 
-void ActionDrop::PreAction(const std::string& query)
+void ActionDrop::PreAction(const std::string& query,int *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
 #endif
+	(*code) = ACTION_DROP;
 }
 
 

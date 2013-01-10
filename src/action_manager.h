@@ -22,33 +22,50 @@
  *
  */
 
-#ifndef FIRESQL_ACTION_H
-#define FIRESQL_ACTION_H
+#ifndef FIRESQL_ACTION_MANAGER_H
+#define FIRESQL_ACTION_MANAGER_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <iostream>
-#include <boost/shared_ptr.hpp>
+#include "action.h"
 
-enum {
-	ACTION_CONTINUE = 0,
-	ACTION_DROP,
-	ACTION_REJECT,
-	ACTION_CLOSE
-};
-// action_codes;
-
-class Action 
+template <class T>
+class SingletonActionManager
 {
 public:
+        template <typename... Args>
 
-	virtual void PreAction(const std::string& query, int *code) = 0;
-	virtual void PostAction(int *code) = 0;
+        static T* GetInstance()
+        {
+                if(!actionManagerInstance_)
+                {
+                        actionManagerInstance_ = new T();
+                }
+                return actionManagerInstance_;
+        }
+
+        static void DestroyInstance()
+        {
+                delete actionManagerInstance_;
+                actionManagerInstance_ = nullptr;
+        }
+
+private:
+        static T* actionManagerInstance_;
 };
 
-typedef boost::shared_ptr<Action> ActionPtr;
- 
-#endif // FIRESQL_ACTION_H
+template <class T> T*  SingletonActionManager<T>::actionManagerInstance_ = nullptr;
+class ActionManager: public SingletonActionManager<ActionManager>
+{
+public:
+	void AddAction(const std::string &name, ActionPtr action);
+
+	friend class SingletonActionManager<ActionManager>;
+private:
+	bool is_query_;
+};
+
+#endif // FIRESQL_MYSQL_DECODER_H
 

@@ -22,33 +22,23 @@
  *
  */
 
-#ifndef FIRESQL_ACTION_H
-#define FIRESQL_ACTION_H
+#ifndef FIRESQL_ACTION_REJECT_H
+#define FIRESQL_ACTION_REJECT_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <iostream>
-#include <boost/shared_ptr.hpp>
+#include "action.h"
 
-enum {
-	ACTION_CONTINUE = 0,
-	ACTION_DROP,
-	ACTION_REJECT,
-	ACTION_CLOSE
-};
-// action_codes;
-
-class Action 
+class ActionReject: public Action 
 {
 public:
+	~ActionReject()=default;
 
-	virtual void PreAction(const std::string& query, int *code) = 0;
-	virtual void PostAction(int *code) = 0;
+	virtual void PreAction(const std::string& query,int *code);
+	virtual void PostAction(int *code);
 };
 
-typedef boost::shared_ptr<Action> ActionPtr;
- 
-#endif // FIRESQL_ACTION_H
+#endif 
 

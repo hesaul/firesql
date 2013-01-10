@@ -50,8 +50,7 @@ public:
 		client_socket_(ios),
 		total_server_data_bytes_(0),
 		total_client_data_bytes_(0),
-		database_user_("none"),
-		forward_query_to_server_(true)
+		database_user_("none")
 	{
 	}
 
@@ -77,7 +76,7 @@ private:
 	void WriteToServer(const boost::system::error_code& error);
 	void ReadFromServer(const boost::system::error_code& error,const size_t& bytes);
 
-	bool forward_query_to_server_;
+	void WriteToClientResponse(const boost::system::error_code& error);
 
 	void Close();
 

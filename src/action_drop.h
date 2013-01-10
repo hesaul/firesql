@@ -36,7 +36,7 @@ class ActionDrop: public Action
 public:
 	~ActionDrop()=default;
 
-	virtual void PreAction(const std::string& query);
+	virtual void PreAction(const std::string& query,int *code);
 	virtual void PostAction(int *code);
 };
 

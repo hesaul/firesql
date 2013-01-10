@@ -22,33 +22,22 @@
  *
  */
 
-#ifndef FIRESQL_ACTION_H
-#define FIRESQL_ACTION_H
+#include "action_reject.h"
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <iostream>
-#include <boost/shared_ptr.hpp>
-
-enum {
-	ACTION_CONTINUE = 0,
-	ACTION_DROP,
-	ACTION_REJECT,
-	ACTION_CLOSE
-};
-// action_codes;
-
-class Action 
+void ActionReject::PreAction(const std::string& query,int *code)
 {
-public:
+#ifdef DEBUG
+        std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
+#endif
+	(*code) = ACTION_REJECT;
+}
 
-	virtual void PreAction(const std::string& query, int *code) = 0;
-	virtual void PostAction(int *code) = 0;
-};
 
-typedef boost::shared_ptr<Action> ActionPtr;
- 
-#endif // FIRESQL_ACTION_H
+void ActionReject::PostAction(int *code)
+{
+#ifdef DEBUG
+        std::cout << __FILE__ << ":"<< __FUNCTION__ <<":closing connection" <<std::endl;
+#endif
+	(*code) = ACTION_CONTINUE;
+}
 

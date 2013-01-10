@@ -42,41 +42,58 @@ bool process_command_line(int argc, char **argv,
 {
 	namespace po = boost::program_options;
 
-	po::options_description desc("FireSql " VERSION " usage", 1024, 512);
+	po::options_description mandatory_ops("Mandatory arguments");
+	mandatory_ops.add_options()
+		("localip,l",   po::value<std::string>(&local_address)->required(),
+			"set the local address of the proxy.")
+		("localport,p",   po::value<unsigned short>(&local_port)->required(),
+			"set the local port of the proxy.")
+		("remoteip,r", po::value<std::string>(&remote_address)->required(), 
+			"set the remote address of the database.")
+		("remoteport,q", po::value<unsigned short>(&remote_port)->required(), 
+			"set the remote port of the database.")
+        	;
+
+	po::options_description optional_ops("Optional arguments");
+	optional_ops.add_options()
+		("help",     	"show help")
+		("version,v",   "show version string")
+          	("regex,R", po::value<std::string>(&regex_exp), 
+			"use a regex for the user queries(default action print).")
+		;
+
+	mandatory_ops.add(optional_ops);
+
 	try
 	{
-		desc.add_options()
-			("help",     "show help")
-          		("localip,l",   po::value<std::string>(&local_address)->required(),
-				"set the local address of the proxy.")
-          		("localport,p",   po::value<unsigned short>(&local_port)->required(),
-				"set the local port of the proxy.")
-          		("remoteip,r", po::value<std::string>(&remote_address)->required(), 
-				"set the remote address of the database.")
-          		("remoteport,q", po::value<unsigned short>(&remote_port)->required(), 
-				"set the remote port of the database.")
-          		("regex,R", po::value<std::string>(&regex_exp), 
-				"user a regex for the user queries.")
-        	;
 		po::variables_map vm;
-        	po::store(po::parse_command_line(argc, argv, desc), vm);
+        	po::store(po::parse_command_line(argc, argv, mandatory_ops), vm);
 
         	if (vm.count("help"))
         	{
-            		std::cout << desc << "\n";
+            		std::cout << "FireSql " VERSION << std::endl;
+            		std::cout << mandatory_ops << std::endl;
             		return false;
         	}
+        	if (vm.count("version"))
+        	{
+            		std::cout << "FireSql " VERSION << std::endl;
+            		return false;
+        	}
+
 
         	po::notify(vm);
     	}
 	catch(boost::program_options::required_option& e)
     	{
+            	std::cout << "FireSql " VERSION << std::endl;
         	std::cerr << "Error: " << e.what() << std::endl;
-		std::cout << desc << std::endl;
+		std::cout << mandatory_ops << std::endl;
         	return false;
     	}
     	catch(...)
-    	{
+    	{	
+            	std::cout << "FireSql " VERSION << std::endl;
         	std::cerr << "Unknown error!" << std::endl;
         	return false;
     	}
@@ -113,7 +130,7 @@ int main(int argc, char* argv[])
 
 	if(regex_exp.size() >0)
 	{
-		ActionPtr action = ActionPtr(new ActionClose());
+		ActionPtr action = ActionPtr(new ActionPrint());
 
 		RuleManager::GetInstance()->AddRule(regex_exp,action);
 	}
