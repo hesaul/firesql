@@ -28,7 +28,8 @@ void ActionPrint::PreAction(const std::string& query,int *code)
 {
 
         std::cout << "Query matchs("<< query << ")" <<std::endl;
-	
+
+	++matchs_;	
 	(*code) = ACTION_CONTINUE;
 }
 

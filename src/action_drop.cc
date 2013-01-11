@@ -29,6 +29,7 @@ void ActionDrop::PreAction(const std::string& query,int *code)
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
 #endif
+	++matchs_;
 	(*code) = ACTION_DROP;
 }
 

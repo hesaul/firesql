@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 
+#include <unordered_map>
 #include "action.h"
 
 template <class T>
@@ -62,9 +63,12 @@ class ActionManager: public SingletonActionManager<ActionManager>
 public:
 	void AddAction(const std::string &name, ActionPtr action);
 
+	void Statistics();
+	ActionPtr GetAction(const std::string &name);
+	
 	friend class SingletonActionManager<ActionManager>;
 private:
-	bool is_query_;
+	std::unordered_map<std::string , ActionPtr> actions_;
 };
 
 #endif // FIRESQL_MYSQL_DECODER_H

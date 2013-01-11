@@ -65,7 +65,7 @@ class MysqlDecoder: public SingletonDecoder<MysqlDecoder>
 {
 public:
 	void Decode(Connection &conn,boost::asio::mutable_buffers_1 buffer);
-	void Reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,int *bytes);
+	void Reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,const std::string &query,int *bytes);
 
 	int32_t GetTotalDecodeQueries() { return total_decode_queries_;}
 	int32_t GetTotalBogusQueries() { return total_bogus_queries_;}

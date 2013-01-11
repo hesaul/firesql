@@ -149,16 +149,22 @@ std::string MysqlDecoder::GetUser(unsigned char *buffer,int buffer_len)
 	return os.str();
 }
 
-void MysqlDecoder::Reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,int *bytes)
+void MysqlDecoder::Reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,const std::string &query,int *bytes)
 {
         unsigned char* packet = boost::asio::buffer_cast<unsigned char*>(buffer);
 	int mysql_packet_len = 0;
+	std::string message;
+	std::ostringstream msg;
+
+	msg << "Syntax error on:"<< query; 
+	message = msg.str();
 
 	mysql_packet_len = 8;
 	memcpy(packet+ MYSQL_PACKET_HEADER_SIZE + 1,"\x76\x04\x23\x34\x32\x30\x30\x30",mysql_packet_len);
 
-	memcpy(packet + MYSQL_PACKET_HEADER_SIZE + 1 + mysql_packet_len, "hola",4);
-	mysql_packet_len += 5;
+	memcpy(packet + MYSQL_PACKET_HEADER_SIZE + 1 + mysql_packet_len, message.c_str(),message.length());
+	mysql_packet_len += message.length() + 1;
+
 	// Copy the header
 	memcpy(packet,"\x00\x00\x00\x01\xff",5);	
 	memcpy(packet , &mysql_packet_len, 1);

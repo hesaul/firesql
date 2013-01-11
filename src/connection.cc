@@ -206,7 +206,9 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
 				}else if(action == ACTION_REJECT) {
 					int response_size = 0;
 
-					decoder->Reject(*this,boost::asio::buffer(client_data_,bytes),&response_size);
+					decoder->Reject(*this,
+						boost::asio::buffer(client_data_,bytes),
+						user_query_,&response_size);
 		
 					/* Write on the client_socket_ a mysql error packet */	
 					async_write(client_socket_,

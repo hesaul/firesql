@@ -46,6 +46,7 @@ public:
 
 	virtual void PreAction(const std::string& query, int *code) = 0;
 	virtual void PostAction(int *code) = 0;
+	virtual int GetMatches() = 0;
 };
 
 typedef boost::shared_ptr<Action> ActionPtr;

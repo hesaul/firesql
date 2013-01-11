@@ -26,19 +26,21 @@
 #endif
 
 #include <csignal>
-#include "action_close.h"
+#include "action_manager.h"
 #include "proxy.h"
 #include <boost/asio.hpp>
 #include <boost/program_options.hpp>
 
 Proxy *proxy;
+ActionManager *action_mng;
 
 bool process_command_line(int argc, char **argv,
 	std::string &local_address,
 	unsigned short &local_port,
 	std::string &remote_address,
 	unsigned short &remote_port,
-	std::string &regex_exp)
+	std::string &regex_exp,
+	std::string &action_str)
 {
 	namespace po = boost::program_options;
 
@@ -60,6 +62,8 @@ bool process_command_line(int argc, char **argv,
 		("version,v",   "show version string")
           	("regex,R", po::value<std::string>(&regex_exp), 
 			"use a regex for the user queries(default action print).")
+          	("action,a", po::value<std::string>(&action_str), 
+			"sets the action when matchs the regex (print,close,reject,drop).")
 		;
 
 	mandatory_ops.add(optional_ops);
@@ -106,8 +110,10 @@ void signalHandler( int signum )
 {
 	proxy->Stop();
 	proxy->Statistics();
+	ActionManager::GetInstance()->Statistics();
 	MysqlDecoder::DestroyInstance();
 	RuleManager::DestroyInstance();
+	ActionManager::DestroyInstance();
 	exit(signum);  
 }
 
@@ -116,10 +122,12 @@ int main(int argc, char* argv[])
 	std::string local_host;
 	std::string remote_host;
 	std::string regex_exp;
+	std::string action_str;
 	unsigned short local_port;
 	unsigned short remote_port;
 
-	if(!process_command_line(argc,argv,local_host,local_port,remote_host,remote_port,regex_exp))
+	if(!process_command_line(argc,argv,local_host,local_port,remote_host,remote_port,
+		regex_exp,action_str))
 	{
 		return 1;
 	}
@@ -128,10 +136,20 @@ int main(int argc, char* argv[])
 
     	signal(SIGINT, signalHandler);  
 
+	ActionManager::GetInstance()->AddAction("print",ActionPtr(new ActionPrint()));
+	ActionManager::GetInstance()->AddAction("drop",ActionPtr(new ActionDrop()));
+	ActionManager::GetInstance()->AddAction("close",ActionPtr(new ActionClose()));
+	ActionManager::GetInstance()->AddAction("reject",ActionPtr(new ActionReject()));
+
 	if(regex_exp.size() >0)
 	{
-		ActionPtr action = ActionPtr(new ActionPrint());
-
+		ActionPtr action = ActionManager::GetInstance()->GetAction(action_str);
+		if(!action)
+		{
+			std::cout << "Unknown action "<< action_str << " using print as default action" <<std::endl;
+			action = ActionManager::GetInstance()->GetAction("print");
+		}
+		
 		RuleManager::GetInstance()->AddRule(regex_exp,action);
 	}
    	try

@@ -38,6 +38,9 @@ public:
 
 	virtual void PreAction(const std::string& query,int *code);
 	virtual void PostAction(int *code);
+	virtual int GetMatches() { return matchs_;}
+private:
+	int32_t matchs_;
 };
 
 #endif // FIRESQL_RULE_H

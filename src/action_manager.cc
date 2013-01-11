@@ -28,5 +28,20 @@
 
 void ActionManager::AddAction(const std::string &name, ActionPtr action)
 {
+	actions_.insert(make_pair(name,action));
+}
 
+ActionPtr ActionManager::GetAction(const std::string &name)
+{
+	return actions_[name];
+}
+
+void ActionManager::Statistics()
+{
+        std::for_each(actions_.begin(),actions_.end(),
+                [](std::pair<std::string,ActionPtr> const &p)
+        {
+                std::cout << "\taction " << p.first <<" matchs:" << p.second->GetMatches()<< std::endl;
+        });
+	return;
 }

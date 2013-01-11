@@ -35,6 +35,10 @@
 #include "connection.h"
 #include "mysql_decoder.h"
 #include "rule_manager.h"
+#include "action_print.h"
+#include "action_drop.h"
+#include "action_close.h"
+#include "action_reject.h"
 
 class Proxy
 {
