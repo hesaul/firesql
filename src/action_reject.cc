@@ -24,21 +24,21 @@
 
 #include "action_reject.h"
 
-void ActionReject::PreAction(const std::string& query,int *code)
+void ActionReject::PreAction(const std::string& query,ActionCodes *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
 #endif
 	++matchs_;
-	(*code) = ACTION_REJECT;
+	(*code) = ActionCodes::REJECT;
 }
 
 
-void ActionReject::PostAction(int *code)
+void ActionReject::PostAction(ActionCodes *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":closing connection" <<std::endl;
 #endif
-	(*code) = ACTION_CONTINUE;
+	(*code) = ActionCodes::CONTINUE;
 }
 

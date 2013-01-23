@@ -36,8 +36,8 @@ class ActionDrop: public Action
 public:
 	~ActionDrop()=default;
 
-	virtual void PreAction(const std::string& query,int *code);
-	virtual void PostAction(int *code);
+	virtual void PreAction(const std::string& query,ActionCodes *code);
+	virtual void PostAction(ActionCodes *code);
 	virtual int GetMatches() { return matchs_;}
 private:
 	int32_t matchs_;

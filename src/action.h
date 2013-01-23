@@ -32,20 +32,19 @@
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 
-enum {
-	ACTION_CONTINUE = 0,
-	ACTION_DROP,
-	ACTION_REJECT,
-	ACTION_CLOSE
+enum class ActionCodes : short {
+	CONTINUE = 0,
+	DROP,
+	REJECT,
+	CLOSE
 };
-// action_codes;
 
 class Action 
 {
 public:
 
-	virtual void PreAction(const std::string& query, int *code) = 0;
-	virtual void PostAction(int *code) = 0;
+	virtual void PreAction(const std::string& query, ActionCodes *code) = 0;
+	virtual void PostAction(ActionCodes *code) = 0;
 	virtual int GetMatches() = 0;
 };
 

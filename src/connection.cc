@@ -181,7 +181,7 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
 	if (!error)
         {
 		MysqlDecoder *decoder = MysqlDecoder::GetInstance();
-		int action = ACTION_CONTINUE;
+		ActionCodes action = ActionCodes::CONTINUE;
 
 		// Decode the server_data_ buffer write from the client
 		// to verify it.
@@ -200,10 +200,10 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
 				default_action_ = rule->GetDefaultAction();
 				default_action_->PreAction(user_query_,&action);
 
-				if(action == ACTION_CLOSE) 
+				if(action == ActionCodes::CLOSE) 
 				{
 					Close();
-				}else if(action == ACTION_REJECT) {
+				}else if(action == ActionCodes::REJECT) {
 					int response_size = 0;
 
 					decoder->Reject(*this,
@@ -222,7 +222,7 @@ void Connection::ReadFromClient(const boost::system::error_code& error,const siz
 			}
 		}
 
-		if(action == ACTION_CONTINUE) 
+		if(action == ActionCodes::CONTINUE) 
 		{
 			// write to the server
 			async_write(server_socket_,

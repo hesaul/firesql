@@ -29,7 +29,6 @@
 #include <config.h>
 #endif
 
-//#include "action_print.h"
 #include <vector>
 #include "rule.h"
 
@@ -70,13 +69,14 @@ public:
 
 	void AddRule(const std::string expression, const ActionPtr action);
 	void AddRule(const std::string expression);
-	void AddRule(const RulePtr rule);
 
 	void Statistics();
 	RulePtr GetCurrentRule() { return current_rule_;};
 	ActionPtr GetDefaultAction(); 
 	friend class SingletonRuleManager<RuleManager>;
 private:
+	void AddRule(const RulePtr rule);
+
 	int32_t total_rules_;
 	int32_t total_matched_rules_;
 	std::vector<RulePtr> rules_;

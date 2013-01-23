@@ -12,15 +12,32 @@ Using FireSql
 To use FireSql just execute the binary firesql:
 
 
-	luis@max-xps:~/c/firesql/src$ ./firesql 
-	Error: missing required option localip
-	FireSql 0.0.1 usage:
-  		--help                  show help
-  		-l [ --localip ] arg    set the local address of the proxy.
-  		-p [ --localport ] arg  set the local port of the proxy.
-  		-r [ --remoteip ] arg   set the remote address of the database.
-  		-q [ --remoteport ] arg set the remote port of the database.
-  		-R [ --regex ] arg      user a regex for the user queries.
+	luis@max-tanga:~/c++/firesql/src$ ./firesql --help
+	FireSql 0.0.1
+	Mandatory arguments:
+	  -l [ --localip ] arg    set the local address of the proxy.
+	  -p [ --localport ] arg  set the local port of the proxy.
+	  -r [ --remoteip ] arg   set the remote address of the database.
+	  -q [ --remoteport ] arg set the remote port of the database.
+
+	Optional arguments:
+	  --help                 show help
+	  -v [ --version ]       show version string
+	  -R [ --regex ] arg     use a regex for the user queries(default action 
+				 print).
+	  -F [ --regexfile ] arg use a regex file for the user queries(default action 
+				 print).
+	  -a [ --action ] arg    sets the action when matchs the regex 
+				 (print,close,reject,drop).
+
+Compile FireSql
+----------------
+
+$ git clone git://github.com/camp0/firesql
+$ ./autgen.sh
+$ ./configure
+$ make
+
 
 Contributing to FireSql 
 -------------------------

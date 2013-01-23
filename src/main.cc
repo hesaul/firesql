@@ -30,6 +30,7 @@
 #include "proxy.h"
 #include <boost/asio.hpp>
 #include <boost/program_options.hpp>
+#include <fstream>
 
 Proxy *proxy;
 ActionManager *action_mng;
@@ -40,6 +41,7 @@ bool process_command_line(int argc, char **argv,
 	std::string &remote_address,
 	unsigned short &remote_port,
 	std::string &regex_exp,
+	std::string &regex_file,
 	std::string &action_str)
 {
 	namespace po = boost::program_options;
@@ -62,6 +64,8 @@ bool process_command_line(int argc, char **argv,
 		("version,v",   "show version string")
           	("regex,R", po::value<std::string>(&regex_exp), 
 			"use a regex for the user queries(default action print).")
+          	("regexfile,F", po::value<std::string>(&regex_file), 
+			"use a regex file for the user queries(default action print).")
           	("action,a", po::value<std::string>(&action_str), 
 			"sets the action when matchs the regex (print,close,reject,drop).")
 		;
@@ -98,7 +102,8 @@ bool process_command_line(int argc, char **argv,
     	catch(...)
     	{	
             	std::cout << "FireSql " VERSION << std::endl;
-        	std::cerr << "Unknown error!" << std::endl;
+        	std::cerr << "Unsupported option." << std::endl;
+		std::cout << mandatory_ops << std::endl;
         	return false;
     	}
 
@@ -122,12 +127,14 @@ int main(int argc, char* argv[])
 	std::string local_host;
 	std::string remote_host;
 	std::string regex_exp;
+	std::string regex_file;
 	std::string action_str;
 	unsigned short local_port;
 	unsigned short remote_port;
+	ActionPtr action;
 
 	if(!process_command_line(argc,argv,local_host,local_port,remote_host,remote_port,
-		regex_exp,action_str))
+		regex_exp,regex_file,action_str))
 	{
 		return 1;
 	}
@@ -141,17 +148,39 @@ int main(int argc, char* argv[])
 	ActionManager::GetInstance()->AddAction("close",ActionPtr(new ActionClose()));
 	ActionManager::GetInstance()->AddAction("reject",ActionPtr(new ActionReject()));
 
-	if(regex_exp.size() >0)
+	if(action_str.size() >0)
 	{
-		ActionPtr action = ActionManager::GetInstance()->GetAction(action_str);
+		action = ActionManager::GetInstance()->GetAction(action_str);
 		if(!action)
 		{
 			std::cout << "Unknown action "<< action_str << " using print as default action" <<std::endl;
 			action = ActionManager::GetInstance()->GetAction("print");
 		}
-		
+	}
+
+	if(regex_exp.size() >0)
+	{
 		RuleManager::GetInstance()->AddRule(regex_exp,action);
 	}
+
+	if(regex_file.size() > 0) 
+	{
+		std::ifstream rfile(regex_file);
+		
+		if(rfile.is_open())
+		{
+			while(rfile.good())
+			{
+				getline(rfile,regex_exp);
+				if(regex_exp.size() >0) 
+				{
+					RuleManager::GetInstance()->AddRule(regex_exp,action);
+				}
+			}
+			rfile.close();
+		}
+	}
+
    	try
    	{
 		proxy = new Proxy(ios,local_host,local_port,remote_host,remote_port);
