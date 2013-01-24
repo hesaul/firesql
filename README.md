@@ -33,10 +33,10 @@ To use FireSql just execute the binary firesql:
 Compile FireSql
 ----------------
 
-$ git clone git://github.com/camp0/firesql
-$ ./autgen.sh
-$ ./configure
-$ make
+    $ git clone git://github.com/camp0/firesql
+    $ ./autogen.sh
+    $ ./configure
+    $ make
 
 
 Contributing to FireSql 

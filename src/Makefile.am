@@ -10,6 +10,7 @@ noinst_HEADERS =	connection.h \
 			action_drop.h \
 			action_print.h \
 			action_reject.h \
+			action_modify_limit.h \
 			action.h \
 			mysqldefs.h 
 
@@ -17,6 +18,7 @@ firesql_SOURCES = 	action_drop.cc \
 			action_close.cc \
 			action_print.cc \
 			action_reject.cc \
+			action_modify_limit.cc \
 			action_manager.cc \
 			rule.cc \
 			mysql_decoder.cc \
