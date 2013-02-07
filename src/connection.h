@@ -56,29 +56,29 @@ public:
 
 	virtual ~Connection()=default;
 
-	boost::asio::ip::tcp::socket& GetServerSocket();
-	boost::asio::ip::tcp::socket& GetClientSocket();
+	boost::asio::ip::tcp::socket& getServerSocket();
+	boost::asio::ip::tcp::socket& getClientSocket();
 
-	void Start(const std::string& server_host, unsigned short server_port);
-	void HandleServerConnect(const boost::system::error_code& error);
-	void Statistics();
+	void start(const std::string& server_host, unsigned short server_port);
+	void handleServerConnect(const boost::system::error_code& error);
+	void statistics();
 	
-	int32_t GetTotalServerBytes() { return total_server_data_bytes_; };
-	int32_t GetTotalClientBytes() { return total_client_data_bytes_; };
-	const std::string &GetClientIpAddress() { return client_ip_;};
-	const std::string &GetDatabaseUser() { return database_user_;};
-	void SetDatabaseUser(std::string user) { database_user_ = user; };
+	int32_t getTotalServerBytes() { return total_server_data_bytes_; };
+	int32_t getTotalClientBytes() { return total_client_data_bytes_; };
+	const std::string &getClientIpAddress() { return client_ip_;};
+	const std::string &getDatabaseUser() { return database_user_;};
+	void setDatabaseUser(std::string user) { database_user_ = user; };
 
 private:
 
-	void WriteToClient(const boost::system::error_code& error);
-	void ReadFromClient(const boost::system::error_code& error,const size_t& bytes);
-	void WriteToServer(const boost::system::error_code& error);
-	void ReadFromServer(const boost::system::error_code& error,const size_t& bytes);
+	void writeToClient(const boost::system::error_code& error);
+	void readFromClient(const boost::system::error_code& error,const size_t& bytes);
+	void writeToServer(const boost::system::error_code& error);
+	void readFromServer(const boost::system::error_code& error,const size_t& bytes);
 
-	void WriteToClientResponse(const boost::system::error_code& error);
+	void writeToClientResponse(const boost::system::error_code& error);
 
-	void Close();
+	void close();
 
 	boost::asio::ip::tcp::socket server_socket_;
 	boost::asio::ip::tcp::socket client_socket_;

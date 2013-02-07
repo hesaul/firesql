@@ -24,7 +24,7 @@
 
 #include "action_drop.h"
 
-void ActionDrop::PreAction(const std::string& query,ActionCodes *code)
+void ActionDrop::preAction(const std::string& query,ActionCodes *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
@@ -34,7 +34,7 @@ void ActionDrop::PreAction(const std::string& query,ActionCodes *code)
 }
 
 
-void ActionDrop::PostAction(ActionCodes *code)
+void ActionDrop::postAction(ActionCodes *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":droping response" <<std::endl;

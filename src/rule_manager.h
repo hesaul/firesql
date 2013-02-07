@@ -38,7 +38,7 @@ class SingletonRuleManager
 public:
         template <typename... Args>
 
-        static T* GetInstance()
+        static T* getInstance()
         {
                 if(!ruleMngInstance_)
                 {
@@ -47,7 +47,7 @@ public:
                 return ruleMngInstance_;
         }
 
-        static void DestroyInstance()
+        static void destroyInstance()
         {
                 delete ruleMngInstance_;
                 ruleMngInstance_ = nullptr;
@@ -62,20 +62,20 @@ class RuleManager: public SingletonRuleManager<RuleManager>
 {
 public:
 
-	int32_t GetTotalRules() { return total_rules_;}
-	int32_t GetTotalMatchingRules() { return total_matched_rules_;}
+	int32_t getTotalRules() { return total_rules_;}
+	int32_t getTotalMatchingRules() { return total_matched_rules_;}
 
-	void Evaluate(const std::string &query,bool *result); 
+	void evaluate(const std::string &query,bool *result); 
 
-	void AddRule(const std::string expression, const ActionPtr action);
-	void AddRule(const std::string expression);
+	void addRule(const std::string expression, const ActionPtr action);
+	void addRule(const std::string expression);
 
-	void Statistics();
-	RulePtr GetCurrentRule() { return current_rule_;};
-	ActionPtr GetDefaultAction(); 
+	void statistics();
+	RulePtr getCurrentRule() { return current_rule_;};
+	ActionPtr getDefaultAction(); 
 	friend class SingletonRuleManager<RuleManager>;
 private:
-	void AddRule(const RulePtr rule);
+	void addRule(const RulePtr rule);
 
 	int32_t total_rules_;
 	int32_t total_matched_rules_;

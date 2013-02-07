@@ -41,7 +41,7 @@ class SingletonDecoder
 public:
         template <typename... Args>
 
-        static T* GetInstance()
+        static T* getInstance()
         {
                 if(!decoderInstance_)
                 {
@@ -50,7 +50,7 @@ public:
                 return decoderInstance_;
         }
 
-        static void DestroyInstance()
+        static void destroyInstance()
         {
                 delete decoderInstance_;
                 decoderInstance_ = nullptr;
@@ -64,18 +64,19 @@ template <class T> T*  SingletonDecoder<T>::decoderInstance_ = nullptr;
 class MysqlDecoder: public SingletonDecoder<MysqlDecoder>
 {
 public:
-	void Decode(Connection &conn,boost::asio::mutable_buffers_1 buffer);
-	void Reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,const std::string &query,int *bytes);
+	void decode(Connection &conn,boost::asio::mutable_buffers_1 buffer);
+	void reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,const std::string &query,int *bytes);
 
-	int32_t GetTotalDecodeQueries() { return total_decode_queries_;}
-	int32_t GetTotalBogusQueries() { return total_bogus_queries_;}
+	int32_t getTotalDecodeQueries() { return total_decode_queries_;}
+	int32_t getTotalBogusQueries() { return total_bogus_queries_;}
 
-	const std::string &GetQuery() { return query_;}
+	const std::string &getQuery() { return query_;}
 	friend class SingletonDecoder<MysqlDecoder>;
-	bool IsQuery() { return is_query_;}
+	bool isQuery() { return is_query_;}
 private:
-	int GetIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset); 
-	std::string GetUser(unsigned char *buffer,int buffer_len);
+	int getIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset); 
+	std::string getUser(unsigned char *buffer,int buffer_len);
+
 	int32_t total_decode_queries_;
 	int32_t total_bogus_queries_;
 	std::string query_;

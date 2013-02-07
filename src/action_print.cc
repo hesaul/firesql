@@ -24,9 +24,8 @@
 
 #include "action_print.h"
 
-void ActionPrint::PreAction(const std::string& query,ActionCodes *code)
+void ActionPrint::preAction(const std::string& query,ActionCodes *code)
 {
-
         std::cout << "Query matchs("<< query << ")" <<std::endl;
 
 	++matchs_;	
@@ -34,7 +33,7 @@ void ActionPrint::PreAction(const std::string& query,ActionCodes *code)
 }
 
 
-void ActionPrint::PostAction(ActionCodes *code)
+void ActionPrint::postAction(ActionCodes *code)
 {
 	(*code) = ActionCodes::CONTINUE;
 }

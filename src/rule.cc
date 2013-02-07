@@ -24,7 +24,7 @@
 
 #include "rule.h"
 
-bool Rule::Evaluate(const char *query) 
+bool Rule::evaluate(const char *query) 
 {
 	return boost::regex_search(query, what, exp_);
 }

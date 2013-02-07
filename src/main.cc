@@ -113,12 +113,12 @@ bool process_command_line(int argc, char **argv,
 
 void signalHandler( int signum )
 {
-	proxy->Stop();
-	proxy->Statistics();
-	ActionManager::GetInstance()->Statistics();
-	MysqlDecoder::DestroyInstance();
-	RuleManager::DestroyInstance();
-	ActionManager::DestroyInstance();
+	proxy->stop();
+	proxy->statistics();
+	ActionManager::getInstance()->statistics();
+	MysqlDecoder::destroyInstance();
+	RuleManager::destroyInstance();
+	ActionManager::destroyInstance();
 	exit(signum);  
 }
 
@@ -139,28 +139,28 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-   	boost::asio::io_service ios;
+   	//boost::asio::io_service ios;
 
     	signal(SIGINT, signalHandler);  
 
-	ActionManager::GetInstance()->AddAction("print",ActionPtr(new ActionPrint()));
-	ActionManager::GetInstance()->AddAction("drop",ActionPtr(new ActionDrop()));
-	ActionManager::GetInstance()->AddAction("close",ActionPtr(new ActionClose()));
-	ActionManager::GetInstance()->AddAction("reject",ActionPtr(new ActionReject()));
+	ActionManager::getInstance()->addAction("print",ActionPtr(new ActionPrint()));
+	ActionManager::getInstance()->addAction("drop",ActionPtr(new ActionDrop()));
+	ActionManager::getInstance()->addAction("close",ActionPtr(new ActionClose()));
+	ActionManager::getInstance()->addAction("reject",ActionPtr(new ActionReject()));
 
 	if(action_str.size() >0)
 	{
-		action = ActionManager::GetInstance()->GetAction(action_str);
+		action = ActionManager::getInstance()->getAction(action_str);
 		if(!action)
 		{
 			std::cout << "Unknown action "<< action_str << " using print as default action" <<std::endl;
-			action = ActionManager::GetInstance()->GetAction("print");
+			action = ActionManager::getInstance()->getAction("print");
 		}
 	}
 
 	if(regex_exp.size() >0)
 	{
-		RuleManager::GetInstance()->AddRule(regex_exp,action);
+		RuleManager::getInstance()->addRule(regex_exp,action);
 	}
 
 	if(regex_file.size() > 0) 
@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 				getline(rfile,regex_exp);
 				if(regex_exp.size() >0) 
 				{
-					RuleManager::GetInstance()->AddRule(regex_exp,action);
+					RuleManager::getInstance()->addRule(regex_exp,action);
 				}
 			}
 			rfile.close();
@@ -183,11 +183,12 @@ int main(int argc, char* argv[])
 
    	try
    	{
-		proxy = new Proxy(ios,local_host,local_port,remote_host,remote_port);
+		proxy = new Proxy(local_host,local_port,remote_host,remote_port);
+		//proxy = new Proxy(ios,local_host,local_port,remote_host,remote_port);
 		
-		proxy->Start();
-		proxy->Run();
-		ios.run();
+		proxy->start();
+		proxy->run();
+	//	ios.run();
    	}
    	catch(std::exception& e)
    	{

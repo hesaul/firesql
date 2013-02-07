@@ -1,5 +1,7 @@
 AUTOMAKE_OPTIONS = gnu
 
+EXTRA_DIST = wrapper.cc setup.py
+
 noinst_HEADERS =	connection.h \
 			proxy.h \
 			mysql_decoder.h \
@@ -33,7 +35,14 @@ firesql_LDADD = $(BOOST_LIBS)
 
 bin_PROGRAMS = firesql
 
-CLEANFILES = *.o *.lo
+BUILT_SOURCES = $(srcdir)/pyfiresql.so
+
+$(srcdir)/pyfiresql.so: wrapper.cc
+	g++ -fPIC rule.cc rule_manager.cc action_print.cc action_manager.cc wrapper.cc `pkg-config --cflags python-2.7` \
+		-I/usr/include/boost/python -std=c++11 -lpthread -lstdc++ -lboost_system \
+		-lboost_thread -lboost_regex -lboost_python -lpython2.7 -o pyfiresql.so -shared 
+
+CLEANFILES = *.o *.lo *.so
 
 MAINTAINERCLEANFILES = \
         $(srcdir)/Makefile \

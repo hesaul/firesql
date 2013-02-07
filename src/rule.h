@@ -44,10 +44,10 @@ public:
 	}
 
 	virtual ~Rule()=default;
-	bool Evaluate(const char *query);
-	const std::string &GetExpression() { return expression_;};	
-	ActionPtr GetDefaultAction() { return default_action_;};
-	void SetDefaultAction(ActionPtr action) { default_action_ = action;};
+	bool evaluate(const char *query);
+	const std::string &eetExpression() { return expression_;};	
+	ActionPtr getDefaultAction() { return default_action_;};
+	void setDefaultAction(ActionPtr action) { default_action_ = action;};
 
 private:
 	int32_t total_matchs_;

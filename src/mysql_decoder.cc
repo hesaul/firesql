@@ -26,7 +26,7 @@
 #include <sstream>
 #include "mysql_decoder.h"
 
-int MysqlDecoder::GetIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset)
+int MysqlDecoder::getIntFromNetworkPacket(unsigned char *packet,int packet_len,int *offset)
 {
 	int off = *offset;
 	int ret = 0;
@@ -75,7 +75,7 @@ int MysqlDecoder::GetIntFromNetworkPacket(unsigned char *packet,int packet_len,i
 	return ret;
 }
 
-void MysqlDecoder::Decode(Connection &conn,boost::asio::mutable_buffers_1 buffer) 
+void MysqlDecoder::decode(Connection &conn,boost::asio::mutable_buffers_1 buffer) 
 {
 	std::size_t bytes = boost::asio::buffer_size(buffer);
 	unsigned char* packet = boost::asio::buffer_cast<unsigned char*>(buffer);
@@ -84,7 +84,7 @@ void MysqlDecoder::Decode(Connection &conn,boost::asio::mutable_buffers_1 buffer
 		return;
 
 	int offset = 0;
-	int mysql_packet_size = GetIntFromNetworkPacket(packet,bytes,&offset);
+	int mysql_packet_size = getIntFromNetworkPacket(packet,bytes,&offset);
 	offset = 3; 
 	int packet_number = packet[offset];
 
@@ -114,8 +114,8 @@ void MysqlDecoder::Decode(Connection &conn,boost::asio::mutable_buffers_1 buffer
 	}
 	else if((type_query == 5)||(type_query == 133)) 
 	{
-		std::string user_ = GetUser(&packet[offset],mysql_packet_size);		
-		conn.SetDatabaseUser(user_);
+		std::string user_ = getUser(&packet[offset],mysql_packet_size);		
+		conn.setDatabaseUser(user_);
 	}else{
 		++total_bogus_queries_;
 	}
@@ -130,7 +130,7 @@ void MysqlDecoder::Decode(Connection &conn,boost::asio::mutable_buffers_1 buffer
 //   Charset 1 byte
 //   Username 30 bytes aprox 
 //   Password hashed 
-std::string MysqlDecoder::GetUser(unsigned char *buffer,int buffer_len)
+std::string MysqlDecoder::getUser(unsigned char *buffer,int buffer_len)
 {
 	std::string user("none");
 	unsigned char *pointer = buffer;
@@ -149,7 +149,7 @@ std::string MysqlDecoder::GetUser(unsigned char *buffer,int buffer_len)
 	return os.str();
 }
 
-void MysqlDecoder::Reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,const std::string &query,int *bytes)
+void MysqlDecoder::reject(Connection &conn,boost::asio::mutable_buffers_1 buffer,const std::string &query,int *bytes)
 {
         unsigned char* packet = boost::asio::buffer_cast<unsigned char*>(buffer);
 	int mysql_packet_len = 0;

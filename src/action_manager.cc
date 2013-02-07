@@ -26,22 +26,23 @@
 #include <sstream>
 #include "action_manager.h"
 
-void ActionManager::AddAction(const std::string &name, ActionPtr action)
+void ActionManager::addAction(const std::string &name, ActionPtr action)
 {
 	actions_.insert(make_pair(name,action));
 }
 
-ActionPtr ActionManager::GetAction(const std::string &name)
+ActionPtr ActionManager::getAction(const std::string &name)
 {
 	return actions_[name];
 }
 
-void ActionManager::Statistics()
+void ActionManager::statistics()
 {
+	std::cout << "acllme" <<std::endl;
         std::for_each(actions_.begin(),actions_.end(),
                 [](std::pair<std::string,ActionPtr> const &p)
         {
-                std::cout << "\taction " << p.first <<" matchs:" << p.second->GetMatches()<< std::endl;
+                std::cout << "\taction " << p.first <<" matchs:" << p.second->getMatches()<< std::endl;
         });
 	return;
 }

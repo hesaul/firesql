@@ -38,7 +38,7 @@ class SingletonActionManager
 public:
         template <typename... Args>
 
-        static T* GetInstance()
+        static T* getInstance()
         {
                 if(!actionManagerInstance_)
                 {
@@ -47,7 +47,7 @@ public:
                 return actionManagerInstance_;
         }
 
-        static void DestroyInstance()
+        static void destroyInstance()
         {
                 delete actionManagerInstance_;
                 actionManagerInstance_ = nullptr;
@@ -61,10 +61,10 @@ template <class T> T*  SingletonActionManager<T>::actionManagerInstance_ = nullp
 class ActionManager: public SingletonActionManager<ActionManager>
 {
 public:
-	void AddAction(const std::string &name, ActionPtr action);
+	void addAction(const std::string &name, ActionPtr action);
 
-	void Statistics();
-	ActionPtr GetAction(const std::string &name);
+	void statistics();
+	ActionPtr getAction(const std::string &name);
 	
 	friend class SingletonActionManager<ActionManager>;
 private:

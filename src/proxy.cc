@@ -25,23 +25,23 @@
 #include "connection.h"
 #include "proxy.h"
 
-void Proxy::Start() 
+void Proxy::start() 
 {
 	start_time_ = boost::posix_time::microsec_clock::local_time();
 	std::cout << "FireSql proxy start" <<std::endl;
 }
 
-void Proxy::Stop()
+void Proxy::stop()
 {
 	std::cout << "FireSql proxy stop" <<std::endl;
 	end_time_ = boost::posix_time::microsec_clock::local_time();
 	io_service_.stop();
 }
 
-void Proxy::Statistics()
+void Proxy::statistics()
 {
-	MysqlDecoder *decoder = MysqlDecoder::GetInstance();
-	RuleManager *rules = RuleManager::GetInstance();
+	MysqlDecoder *decoder = MysqlDecoder::getInstance();
+	RuleManager *rules = RuleManager::getInstance();
 	int t = 0;
 	int32_t bytes_server = 0;
 	int32_t bytes_client = 0;
@@ -53,9 +53,9 @@ void Proxy::Statistics()
 	std::for_each(connection_list_.begin(), 
 		connection_list_.end(), [&](boost::shared_ptr<Connection>& it)
 	{ 
-		it->Statistics();
-		bytes_server += it->GetTotalServerBytes();
-		bytes_client += it->GetTotalClientBytes();
+		it->statistics();
+		bytes_server += it->getTotalServerBytes();
+		bytes_client += it->getTotalClientBytes();
 	});
 
 	std::cout << "Statistics" <<std::endl;
@@ -63,24 +63,24 @@ void Proxy::Statistics()
 	std::cout << "\tconnections:" << total_connections <<std::endl;
 	std::cout << "\tserver bytes:" << bytes_server <<std::endl;
 	std::cout << "\tclient bytes:" << bytes_client <<std::endl;
-	std::cout << "\ttotal queries:" << decoder->GetTotalDecodeQueries() <<std::endl;
-	std::cout << "\ttotal bogus queries:" << decoder->GetTotalBogusQueries() <<std::endl;
-	std::cout << "\ttotal rules:" << rules->GetTotalRules() << std::endl;
-	std::cout << "\ttotal matching rules:" << rules->GetTotalMatchingRules() << std::endl;
+	std::cout << "\ttotal queries:" << decoder->getTotalDecodeQueries() <<std::endl;
+	std::cout << "\ttotal bogus queries:" << decoder->getTotalBogusQueries() <<std::endl;
+	std::cout << "\ttotal rules:" << rules->getTotalRules() << std::endl;
+	std::cout << "\ttotal matching rules:" << rules->getTotalMatchingRules() << std::endl;
 	return;
 }
 
-void Proxy::HandleAccept(const boost::system::error_code& error)
+void Proxy::handleAccept(const boost::system::error_code& error)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
 #endif
         if (!error)
         {
-        	session_->Start(server_host_,server_port_);
+        	session_->start(server_host_,server_port_);
 		connection_list_.push_back(session_);
 		total_connections++;
-               	if(!Run())
+               	if(!run())
                	{
                 	std::cerr << "Failure during call to accept." << std::endl;
                	}
@@ -90,7 +90,7 @@ void Proxy::HandleAccept(const boost::system::error_code& error)
 	return;
 }
 
-bool Proxy::Run()
+bool Proxy::run()
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<std::endl;
@@ -98,8 +98,8 @@ bool Proxy::Run()
         try
         {
         	session_ = ConnectionPtr(new Connection(io_service_));
-               	acceptor_.async_accept(session_->GetServerSocket(),
-                	boost::bind(&Proxy::HandleAccept,
+               	acceptor_.async_accept(session_->getServerSocket(),
+                	boost::bind(&Proxy::handleAccept,
                         	this,
                          	boost::asio::placeholders::error));
 
@@ -107,6 +107,7 @@ bool Proxy::Run()
                std::cerr << "acceptor exception: " << e.what() << std::endl;
                return false;
         }
+	io_service_.run();
         return true;
 }
 

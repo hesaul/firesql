@@ -24,7 +24,7 @@
 
 #include "action_reject.h"
 
-void ActionReject::PreAction(const std::string& query,ActionCodes *code)
+void ActionReject::preAction(const std::string& query,ActionCodes *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
@@ -34,7 +34,7 @@ void ActionReject::PreAction(const std::string& query,ActionCodes *code)
 }
 
 
-void ActionReject::PostAction(ActionCodes *code)
+void ActionReject::postAction(ActionCodes *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":closing connection" <<std::endl;

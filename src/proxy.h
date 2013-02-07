@@ -43,10 +43,10 @@
 class Proxy
 {
 public:
-	explicit Proxy(boost::asio::io_service& io_service,
+	explicit Proxy(
         	const std::string& local_host, unsigned short local_port,
                 const std::string& server_host, unsigned short server_port)
-        	: io_service_(io_service),
+        	: 
            	localhost_address(boost::asio::ip::address_v4::from_string(local_host)),
            	acceptor_(io_service_,boost::asio::ip::tcp::endpoint(localhost_address,local_port)),
            	server_port_(server_port),
@@ -54,18 +54,43 @@ public:
 		total_connections(0)
 	{
 		return;
-	}
+	}	
+/*
+        explicit Proxy(
+                const std::string& local_host)
+                : 
+                localhost_address(boost::asio::ip::address_v4::from_string(local_host)),
+                acceptor_(io_service_,boost::asio::ip::tcp::endpoint(localhost_address,3000)),
+                server_port_(3306),
+                server_host_("10.10.10.1"),
+                total_connections(0)
+        {
+                return;
+        }
+*/
+/*        Proxy()
+                :
+                localhost_address(boost::asio::ip::address_v4::from_string("127.0.0.1")),
+                acceptor_(io_service_,boost::asio::ip::tcp::endpoint(localhost_address,3000)),
+                server_port_(3306),
+                server_host_("10.10.10.1"),
+                total_connections(0)
+        {
+                return;
+        }
+*/
+//	Proxy() {}
 
-	void Start();
-	bool Run();
-	void Statistics();
-	void Stop();
+	void start();
+	bool run();
+	void statistics();
+	void stop();
 private:
-	void HandleAccept(const boost::system::error_code& error);
+	void handleAccept(const boost::system::error_code& error);
 
 	boost::posix_time::ptime start_time_;
 	boost::posix_time::ptime end_time_;
-        boost::asio::io_service& io_service_;
+        boost::asio::io_service io_service_;
         boost::asio::ip::address_v4 localhost_address;
         boost::asio::ip::tcp::acceptor acceptor_;
         unsigned short server_port_;

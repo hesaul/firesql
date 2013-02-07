@@ -26,37 +26,37 @@
 #include "rule_manager.h"
 #include "action_print.h"
 
-void RuleManager::AddRule(RulePtr rule)
+void RuleManager::addRule(RulePtr rule)
 {
 	rules_.push_back(rule);
 	total_rules_ += 1;
 }
 
 
-void RuleManager::AddRule(const std::string expression,ActionPtr action)
+void RuleManager::addRule(const std::string expression,ActionPtr action)
 {
         RulePtr rule = RulePtr(new Rule(expression));
 
-        rule->SetDefaultAction(action);
-        AddRule(rule);
+        rule->setDefaultAction(action);
+        addRule(rule);
 }
 
 
-void RuleManager::AddRule(const std::string expression)
+void RuleManager::addRule(const std::string expression)
 {
 	ActionPtr action = ActionPtr(new ActionPrint()); // the default action
 
-	AddRule(expression,action);
+	addRule(expression,action);
 }
 
 
-void RuleManager::Evaluate(const std::string &query, bool *result)
+void RuleManager::evaluate(const std::string &query, bool *result)
 {
         std::for_each(rules_.begin(),
                 rules_.end(),  [&](boost::shared_ptr<Rule>& r)
         {
 		current_rule_ = r;
-		if(r->Evaluate(query.c_str()))
+		if(r->evaluate(query.c_str()))
 		{
 			++total_matched_rules_;
 			(*result) = true;
@@ -67,7 +67,7 @@ void RuleManager::Evaluate(const std::string &query, bool *result)
 	return;
 }
 
-ActionPtr RuleManager::GetDefaultAction() 
+ActionPtr RuleManager::getDefaultAction() 
 { 
 	if(!default_action_)
 	{

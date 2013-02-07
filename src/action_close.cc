@@ -24,7 +24,7 @@
 
 #include "action_close.h"
 
-void ActionClose::PreAction(const std::string& query,ActionCodes *code)
+void ActionClose::preAction(const std::string& query,ActionCodes *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":matchs("<< query << ")" <<std::endl;
@@ -34,7 +34,7 @@ void ActionClose::PreAction(const std::string& query,ActionCodes *code)
 }
 
 
-void ActionClose::PostAction(ActionCodes *code)
+void ActionClose::postAction(ActionCodes *code)
 {
 #ifdef DEBUG
         std::cout << __FILE__ << ":"<< __FUNCTION__ <<":closing connection" <<std::endl;
